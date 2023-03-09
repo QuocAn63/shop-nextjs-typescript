@@ -98,9 +98,11 @@ const Header = () => {
             <SearchOutlined />
           </button>
           <Cart>
-            <div className="flex items-center justify-center border-0 bg-transparent px-1 py-2 text-2xl">
-              <ShoppingCartOutlined />
-            </div>
+            <Link href="/cart">
+              <div className="flex items-center justify-center border-0 bg-transparent px-1 py-2 text-2xl">
+                <ShoppingCartOutlined />
+              </div>
+            </Link>
           </Cart>
         </div>
       ),

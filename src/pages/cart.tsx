@@ -1,9 +1,11 @@
 import CartItem from "@/components/cart/cartItem";
 import Currency from "@/components/currency";
 import Layout from "@/components/layout";
-import { Col, InputNumber, Row, Table } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
+import { Button, Col, InputNumber, Row, Space, Table } from "antd";
 import { ColumnsType } from "antd/es/table";
 import Image from "next/image";
+import Link from "next/link";
 import { FC, useState } from "react";
 
 interface CartDataType {
@@ -20,26 +22,31 @@ const cartTableColumns: ColumnsType<CartDataType> = [
     title: "Name",
     dataIndex: "name",
     key: "name",
+    render(value) {
+      return <Link href="/">{value}</Link>;
+    },
   },
   {
     title: "Picture",
     dataIndex: "image",
     key: "image",
-    render: (text) => <Image src={text} alt={text} width={100} height={200} />,
+    render: (value) => (
+      <Image src={value} alt={value} width={100} height={200} />
+    ),
   },
   {
     title: "Price",
     dataIndex: "price",
     key: "price",
-    render: (text, records) => (
-      <Currency price={text} promotion={records["promotion"]} wrap />
+    render: (value, records) => (
+      <Currency price={value} promotion={records["promotion"]} wrap />
     ),
   },
   {
     title: "Quantity",
     dataIndex: "quantity",
     key: "quantity",
-    render: (text) => <InputNumber defaultValue={text} />,
+    render: (value) => <InputNumber defaultValue={value} min={1} />,
   },
   {
     title: "Amount",
@@ -54,6 +61,16 @@ const cartTableColumns: ColumnsType<CartDataType> = [
         />
       );
     },
+  },
+  {
+    title: "Actions",
+    key: "actions",
+    dataIndex: "key",
+    render: (value) => (
+      <button className="block bg-transparent outline-none border-none text-gray-500 hover:text-red-400 transition-colors">
+        <CloseOutlined />
+      </button>
+    ),
   },
 ];
 
@@ -91,15 +108,41 @@ const Cart: FC = () => {
                 </span>
               </div>
             </Col>
-            <Col span={16}>
+            <Col span={18}>
               <Table
                 columns={cartTableColumns}
                 dataSource={currentCart}
                 pagination={false}
               />
             </Col>
-            <Col span={8}>
-              <aside className="px-8">Cart Sidebar</aside>
+            <Col span={6}>
+              <aside className="px-8">
+                <div>
+                  <p className="flex justify-between">
+                    <span className="font-semibold">Provisional: </span>
+                    <Currency>{0}</Currency>
+                  </p>
+                  <hr className="block mt-10 mb-2"></hr>
+                  <p className="flex justify-between">
+                    <span className="font-semibold">Subtotal: </span>
+                    <Currency className="text-lg">{0}</Currency>
+                  </p>
+                </div>
+                <div className="flex gap-5 mt-5">
+                  <Link
+                    href="/checkout"
+                    className="block rounded text-center py-3 font-semibold uppercase w-full text-white border-2 border-black bg-black hover:text-white hover:opacity-80 transition-all"
+                  >
+                    Pay Now
+                  </Link>
+                  <Link
+                    href="/"
+                    className="block rounded text-center py-3 font-semibold uppercase w-full text-black border-2 border-black hover:opacity-80 transition-all"
+                  >
+                    Continue Buying
+                  </Link>
+                </div>
+              </aside>
             </Col>
           </Row>
         </Layout>

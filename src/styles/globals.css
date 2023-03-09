@@ -17,3 +17,8 @@ html {
   font-size: inherit;
   color: currentColor;
 }
+
+a:hover,
+button:hover {
+  color: inherit;
+}
