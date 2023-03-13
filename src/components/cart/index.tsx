@@ -7,7 +7,7 @@ import Link from "next/link";
 const productItem = {
   id: "air_jordan_1_mid_light",
   name: "AIR JORDAN 1 MID LIGHT CARDINAL CURRY (GS) [554725-201]",
-  image: "/91-7329.jpg",
+  theme: "/91-7329.jpg",
   price: 4200000,
   promotion: 30,
   quantity: 1,
@@ -16,6 +16,7 @@ const productItem = {
   productSizes: ["40.0", "40.5", "41.0", "42.0", "43.0"],
   status: "available",
   description: "",
+  size: "30.5",
 };
 
 const Cart: FC<ScriptProps> = ({ children }) => {

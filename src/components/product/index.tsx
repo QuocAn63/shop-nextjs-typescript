@@ -42,7 +42,7 @@ const Product: FC<
 }) => {
   return (
     <Link href={`/product/${id}`}>
-      <div className="shadow-sm  mt-4">
+      <div className="shadow-sm mt-4">
         <Image
           src={theme}
           alt="91-7329"

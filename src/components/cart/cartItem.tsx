@@ -2,21 +2,14 @@ import { Col, Image, Row, Typography } from "antd";
 import { FC } from "react";
 import Currency from "../currency";
 import Link from "next/link";
+import { CartItem } from "@/interfaces";
 
-type CartItemProps = {
-  name: string;
-  image: string;
-  category: string;
-  quantity: number;
-  price: number;
-} & React.HTMLAttributes<HTMLElement>;
-
-const CartItem: FC<React.HTMLAttributes<HTMLElement> & CartItemProps> = ({
+const CartItem: FC<React.HTMLAttributes<HTMLElement> & CartItem> = ({
   name,
-  image,
-  category,
+  theme,
   quantity,
   price,
+  size,
   ...props
 }) => {
   return (
@@ -27,13 +20,15 @@ const CartItem: FC<React.HTMLAttributes<HTMLElement> & CartItemProps> = ({
     >
       <Row gutter={8}>
         <Col span={6}>
-          <Image src={image} alt={name} preview={false} />
+          <Image src={theme} alt={name} preview={false} />
         </Col>
         <Col span={18}>
           <div className="mt-2 flex flex-col justify-between">
-            <Typography.Text ellipsis={true}>{name}</Typography.Text>
+            <Typography.Text ellipsis={true} className="font-semibold">
+              {name}
+            </Typography.Text>
             <p className="flex justify-between items-end">
-              <span className="text-sm">{category}</span>
+              <span className="text-sm">{size}</span>
               <span>
                 {<Currency price={price} />} x {quantity}
               </span>

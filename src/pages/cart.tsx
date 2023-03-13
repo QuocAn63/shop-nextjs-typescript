@@ -1,8 +1,7 @@
-import CartItem from "@/components/cart/cartItem";
 import Currency from "@/components/currency";
 import Layout from "@/components/layout";
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, Col, InputNumber, Row, Space, Table } from "antd";
+import { Col, InputNumber, Row, Space, Table } from "antd";
 import { ColumnsType } from "antd/es/table";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,6 +11,7 @@ interface CartDataType {
   key: string;
   name: string;
   image: string;
+  size: string;
   price: number;
   quantity: number;
   promotion: number;
@@ -20,10 +20,19 @@ interface CartDataType {
 const cartTableColumns: ColumnsType<CartDataType> = [
   {
     title: "Name",
-    dataIndex: "name",
     key: "name",
-    render(value) {
-      return <Link href="/">{value}</Link>;
+    render(_, records) {
+      return (
+        <div>
+          <Link href="/" className="font-semibold" target="_blank">
+            {records["name"]}
+          </Link>
+          <p className="text-sm pt-2">
+            <span>Size: </span>
+            <span className="font-semibold">{records["size"]}</span>
+          </p>
+        </div>
+      );
     },
   },
   {
@@ -67,7 +76,7 @@ const cartTableColumns: ColumnsType<CartDataType> = [
     key: "actions",
     dataIndex: "key",
     render: (value) => (
-      <button className="block bg-transparent outline-none border-none text-gray-500 hover:text-red-400 transition-colors">
+      <button className="block bg-transparent outline-none border-none text-gray-400 hover:text-red-400 transition-colors">
         <CloseOutlined />
       </button>
     ),
@@ -81,6 +90,7 @@ const productItem = {
   price: 4200000,
   promotion: 30,
   quantity: 1,
+  size: "30.5",
 };
 
 const Cart: FC = () => {
@@ -116,7 +126,7 @@ const Cart: FC = () => {
               />
             </Col>
             <Col span={6}>
-              <aside className="px-8">
+              <aside className="px-8 ">
                 <div>
                   <p className="flex justify-between">
                     <span className="font-semibold">Provisional: </span>

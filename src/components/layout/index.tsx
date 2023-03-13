@@ -2,7 +2,7 @@ import { PropsWithChildren } from "react";
 import Header from "../header";
 import Footer from "../footer";
 
-const Layout = (props: PropsWithChildren) => {
+const Layout = ({ ...props }: PropsWithChildren) => {
   return (
     <div className="w-full flex flex-col items-center flex-wrap">
       <Header />
