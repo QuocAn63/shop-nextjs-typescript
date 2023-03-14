@@ -49,10 +49,12 @@ const Product: FC<
           preview={false}
           className="hover:scale-110 transition-all"
         />
-        <div className="mt-1">
+        <div className="mt-1 px-2">
           <Typography.Title level={4}>{brand}</Typography.Title>
           <Typography.Text className="text-sm">{name}</Typography.Text>
-          <Currency promotion={promotion}>{price}</Currency>
+          <p>
+            <Currency promotion={promotion} space={6}>{price}</Currency>
+          </p>
         </div>
       </div>
     </Link>

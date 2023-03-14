@@ -1,34 +1,31 @@
+import { Blog } from "@/interfaces/Blog";
 import Image from "next/image";
 import Link from "next/link";
-import { FC } from "react";
 
-const HorizontalBlogItem: FC = () => {
+const HorizontalBlogItem = ({id, slug, title, theme, content, createdAt, author, ...props}: Blog) => {
+  const BlogContent = ({...props}) => <div {...props} dangerouslySetInnerHTML={{__html: content}} />
+
   return (
     <div className="border border-gray-200 rounded-md p-6">
       <div className="flex justify-between">
-        <span className="text-xs font-semibold">Admin</span>
+        <span className="text-xs font-semibold">{author}</span>
       </div>
       <div className="flex gap-5">
         <div className="pr-8">
-          <Link href="/" className="block">
-            <h2 className="py-3 text-xl font-semibold">
-              ADIDAS STAN SMITH: ĐÔI GIÀY PHỔ BIẾN NHẤT CỦA THƯƠNG HIỆU ADIDAS
-            </h2>
+          <Link href={`/blogs/${slug}`} className="block">
+            <h2 className="py-3 text-xl font-semibold">{title}</h2>
           </Link>
           <p className="py-2 text-sm">
-            Giày Adidas Stan Smith đến với những người yêu giày vào năm 1971 với
-            tên gọi chính thức là Stan Smith, nhưng thực tế mẫu giày này ra đời
-            từ năm 1963, khi đó mọi người biết rằng những đôi giày này ó tên gọi
-            khác...
+            <BlogContent />
           </p>
           <div className="pt-2">
-            <span className="text-sm text-gray-500">5 days ago</span>
+            <span className="text-sm text-gray-500">{createdAt}</span>
           </div>
         </div>
-        <Link href="/" className="shrink-0">
+        <Link href={`/blogs/${slug}`} className="shrink-0">
           <Image
-            src="/643333-7297.jpg"
-            alt="ADIDAS STAN SMITH: ĐÔI GIÀY PHỔ BIẾN NHẤT CỦA THƯƠNG HIỆU ADIDAS"
+            src={theme}
+            alt={title}
             width={200}
             height={100}
             className="block rounded-2xl"
