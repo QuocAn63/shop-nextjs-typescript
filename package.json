@@ -23,11 +23,7 @@
     "classnames": "^2.3.2",
     "eslint": "8.34.0",
     "eslint-config-next": "13.1.6",
-<<<<<<< HEAD
-    "mongoose": "^7.0.1",
-=======
     "mongodb": "^5.1.0",
->>>>>>> 0c670fbeab07b8b429eec6d37c015d78e9bfac05
     "next": "13.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
