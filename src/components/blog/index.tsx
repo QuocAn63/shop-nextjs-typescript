@@ -1,24 +1,26 @@
+import { BlogInterface } from "@/interfaces";
 import { Image, Typography } from "antd";
 import Link from "next/link";
+import { FC } from "react";
 
-const Blog = () => {
+const Blog : FC<BlogInterface> = ({id, title, slug, content, theme, author, createdAt, ...props}) => {
   return (
     <Link
-      href="/"
+      href={`/blogs/${slug}`}
       className="flex flex-col justify-center w-full h-full mt-4 hover:shadow transition-all"
-      title="ADIDAS STAN SMITH: ĐÔI GIÀY PHỔ BIẾN NHẤT CỦA THƯƠNG HIỆU ADIDAS"
+      title={title}
     >
       <Image
-        src="/643333-7297.jpg"
-        alt="643333-7297.jpg"
+        src={`/${theme}`}
+        alt={`/${theme}`}
         className="w-full h-full"
         preview={false}
       />
       <div className="mt-2 px-5">
         <Typography.Title level={4}>
-          ADIDAS STAN SMITH: ĐÔI GIÀY PHỔ BIẾN NHẤT CỦA THƯƠNG HIỆU ADIDAS
+    {title}
         </Typography.Title>
-        <Typography.Text className="text-md">25/02/2023</Typography.Text>
+        <Typography.Text className="text-md">{createdAt}</Typography.Text>
       </div>
     </Link>
   );

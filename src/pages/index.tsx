@@ -2,27 +2,24 @@ import Layout from "@/components/layout";
 import Product from "@/components/product";
 import { Carousel, Col, Image, Row, Typography } from "antd";
 import Head from "next/head";
-import type { productProps } from "@/components/product";
 import styles from "@/styles/home.module.scss";
 import Blog from "@/components/blog";
 import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import Link from "next/link";
+import dbConnector from "@/database";
+import homeModel from "@/database/models/home";
+import type { IBlogSchema } from "@/database/models/blog";
+import type { IProductSchema} from '../database/models/product'
+import { NextPage } from "next";
+import { HomeInterface } from "@/interfaces/Home";
+import { ProductInterface } from "@/interfaces";
+import blogModel from "@/database/models/blog";
 
-const productItem: productProps = {
-  id: "air_jordan_1_mid_light",
-  name: "AIR JORDAN 1 MID LIGHT CARDINAL CURRY (GS) [554725-201]",
-  theme: "/91-7329.jpg",
-  images: ["/91-7329.jpg", "/91-7329.jpg", "/91-7329.jpg"],
-  price: 4200000,
-  promotion: 30,
-  category: "AIR JORDAN 6",
-  brand: "AIR JORDAN",
-  productSizes: ["40.0", "40.5", "41.0", "42.0", "43.0"],
-  status: "available",
-  description: "",
-};
+type homePropsType = {
+  homeProps: HomeInterface
+} & NextPage
 
-export default function Home() {
+export default function Home({ homeProps, ...props }: homePropsType) {
   const NextButton = ({ currentSlide, slideCount, ...props }: any) => {
     return <RightCircleOutlined {...props} />;
   };
@@ -30,7 +27,7 @@ export default function Home() {
   const PrevButton = ({ currentSlide, slideCount, ...props }: any) => {
     return <LeftCircleOutlined {...props} />;
   };
-
+  
   return (
     <>
       <Head>
@@ -46,106 +43,34 @@ export default function Home() {
             id="categoriesPanel"
             className={styles.contentSection}
           >
-            <Col span={6}>
-              <Link
-                href="/"
-                title="Air Jordan 1"
-                className={"relative block " + styles.categoryTab}
-              >
-                <div className="overflow-hidden">
-                  <Image
-                    className={styles.categoryTab_theme}
-                    src="/tm1.jpg"
-                    alt="Air Force 1"
-                    preview={false}
-                  />
-                </div>
-                <Typography.Title
-                  level={4}
-                  className={
-                    "bg-white bottom-0 absolute text-center left-3 right-3 text-sm " +
-                    styles.categoryTab_title
-                  }
-                >
-                  Air Force 1
-                </Typography.Title>
-              </Link>
-            </Col>
-            <Col span={6}>
-              <Link
-                href="/"
-                title="Air Jordan 1"
-                className={"relative block " + styles.categoryTab}
-              >
-                <div className="overflow-hidden">
-                  <Image
-                    className={styles.categoryTab_theme}
-                    src="/tm2.jpg"
-                    alt="Air Force 1"
-                    preview={false}
-                  />
-                </div>
-                <Typography.Title
-                  level={4}
-                  className={
-                    "bg-white bottom-0 absolute text-center left-3 right-3 text-sm " +
-                    styles.categoryTab_title
-                  }
-                >
-                  Air Jordan 1
-                </Typography.Title>
-              </Link>
-            </Col>
-            <Col span={6}>
-              <Link
-                href="/"
-                title="Air Jordan 1"
-                className={"relative block " + styles.categoryTab}
-              >
-                <div className="overflow-hidden">
-                  <Image
-                    className={styles.categoryTab_theme}
-                    src="/tm4.jpg"
-                    alt="Air Force 1"
-                    preview={false}
-                  />
-                </div>
-                <Typography.Title
-                  level={4}
-                  className={
-                    "bg-white bottom-0 absolute text-center left-3 right-3 text-sm " +
-                    styles.categoryTab_title
-                  }
-                >
-                  Ultra Boost
-                </Typography.Title>
-              </Link>
-            </Col>
-            <Col span={6}>
-              <Link
-                href="/"
-                title="Air Jordan 1"
-                className={"relative block " + styles.categoryTab}
-              >
-                <div className="overflow-hidden">
-                  <Image
-                    className={styles.categoryTab_theme}
-                    src="/tm3.jpg"
-                    alt="Air Force 1"
-                    preview={false}
-                  />
-                </div>
-                <Typography.Title
-                  level={4}
-                  className={
-                    "bg-white bottom-0 absolute text-center left-3 right-3 text-sm " +
-                    styles.categoryTab_title
-                  }
-                >
-                  Air Max 1
-                </Typography.Title>
-              </Link>
-            </Col>
+            {
+                homeProps.category_slider.map(category => <Col span={6} key={category.title as string}>
+              
+                  <Link
+                    href="/"
+                    title="Air Jordan 1"
+                    className={"relative block " + styles.categoryTab}
+                    
+                  >
+                    <div className="overflow-hidden">
+                      <Image
+                        className={styles.categoryTab_theme}
+                        src={category.theme as string}
+                        alt={category.title as string}
+                        preview={false}
+                      />
+                    </div>
+                    <Typography.Title
+                      level={4}
+                      className={
+                        "bg-white bottom-0 absolute text-center left-3 right-3 text-sm " +
+                        styles.categoryTab_title
+                      }
+                    >
+                      {category.title}
+                    </Typography.Title>
+                  </Link>
+                </Col>)              }
           </Row>
           <Row gutter={16} id="newReleases" className={styles.contentSection}>
             <Col span={24}>
@@ -165,14 +90,9 @@ export default function Home() {
                 prevArrow={<PrevButton />}
                 nextArrow={<NextButton />}
               >
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
+                                {
+                  homeProps.newest_products_slider.map((product) => <Product key={product.modelId} {...product} />)
+                }
               </Carousel>
             </Col>
           </Row>
@@ -194,14 +114,9 @@ export default function Home() {
                 prevArrow={<PrevButton />}
                 nextArrow={<NextButton />}
               >
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
-                <Product {...productItem} />
+                {
+                  homeProps.top_products_slider.map((product) => <Product key={product.modelId} {...product} />)
+                }
               </Carousel>
             </Col>
           </Row>
@@ -214,15 +129,11 @@ export default function Home() {
                 BLOGS
               </Typography.Title>
             </Col>
-            <Col span={8}>
-              <Blog />
-            </Col>
-            <Col span={8}>
-              <Blog />
-            </Col>
-            <Col span={8}>
-              <Blog />
-            </Col>
+            {
+              homeProps.blogs.map(blog => <Col span={8} key={blog.slug}>
+                <Blog {...blog} />
+              </Col>)
+            }
             <Col span={24} className="text-center mt-8">
               <Link href="/1">View more</Link>
             </Col>
@@ -260,4 +171,15 @@ export default function Home() {
       </main>
     </>
   );
+}
+
+export async function getServerSideProps() {
+    await dbConnector()
+    const homeProps = await homeModel.findOne({}).populate<{newest_products_slider: IProductSchema, top_products_slider: IProductSchema, blogs: IBlogSchema}>(["newest_products_slider", "top_products_slider", "blogs"])
+    
+    return {
+      props: {
+        homeProps: JSON.parse(JSON.stringify(homeProps))
+      }
+    }
 }

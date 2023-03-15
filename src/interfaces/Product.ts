@@ -1,5 +1,5 @@
-export interface Product {
-  id: string;
+export interface ProductInterface {
+  modelId: string;
   name: string;
   theme: string;
   images: string[];
