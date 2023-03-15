@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   env: {
     mongo_uri:
-      "mongodb+srv://caoan632002:0903413280An@cluster0.7wk1tu3.mongodb.net/test",
+      "mongodb+srv://caoan632002:0903413280An@cluster0.7wk1tu3.mongodb.net/sneaker-store",
   },
 };
 
