@@ -1,7 +1,8 @@
 import Layout from "@/components/layout";
+import { NextPage } from "next";
 import { FC } from "react";
 
-const About: FC = () => {
+const About: NextPage = () => {
   return (
     <>
       <header>
