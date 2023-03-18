@@ -1,6 +1,6 @@
-import mongoose, { model, Schema, Types } from "mongoose";
+import mongoose, { Document, model, Schema, Types } from "mongoose";
 
-export interface IProductSchema {
+export interface IProductSchema extends Document {
     modelId: String
     name: String   
     sizes: String[]
@@ -14,7 +14,7 @@ export interface IProductSchema {
     category:Types.ObjectId 
 }
 
-const productSchema = new Schema<IProductSchema>({
+const ProductSchema = new Schema<IProductSchema>({
     modelId: {
         type: String,
         required: true
@@ -45,7 +45,7 @@ const productSchema = new Schema<IProductSchema>({
     },
     brand: {
         type: Schema.Types.ObjectId,
-        ref: "brand"
+        ref: "Brand"
     },
     price: {
         type: Number,
@@ -58,9 +58,9 @@ const productSchema = new Schema<IProductSchema>({
     },
     category:{
         type: Schema.Types.ObjectId,
-        ref: "brand"
+        ref: "Brand.Categories"
     }
 })
 
-const productModel = mongoose.models.product || model("product", productSchema)
-export default productModel
+const ProductModel = mongoose.models.Product || model("Product", ProductSchema)
+export default ProductModel

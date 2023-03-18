@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
 interface IStaffSchema {
     username: String
@@ -6,7 +6,7 @@ interface IStaffSchema {
     displayName: String
 }
 
-const staffSchema = new Schema<IStaffSchema>({
+const StaffSchema = new Schema<IStaffSchema>({
       username: {
         type: String,
         required: true
@@ -21,4 +21,5 @@ const staffSchema = new Schema<IStaffSchema>({
       }
 })
 
-export default model("staff", staffSchema)
+const Model = model("Staff", StaffSchema)
+export default mongoose.models.Staff || Model

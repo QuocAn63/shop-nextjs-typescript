@@ -1,7 +1,11 @@
 import Layout from "@/components/layout";
-import Product, { productProps } from "@/components/product";
+import Product from "@/components/product";
 import { ShopSidebar } from "@/components/sidebar";
+import dbConnector from "@/database";
+import ProductModel from "@/database/models/product";
+import { ProductInterface } from "@/interfaces";
 import { Col, Pagination, Row } from "antd";
+import { GetStaticProps } from "next";
 import Head from "next/head";
 import { Suspense } from "react";
 import Loading from "./loading";
@@ -128,21 +132,34 @@ const SidebarItems = {
   } as sidebarItemProps,
 };
 
-const productItem: productProps = {
-  id: "air_jordan_1_mid_light",
+const productItem: ProductInterface = {
+  modelId: "air_jordan_1_mid_light",
   name: "AIR JORDAN 1 MID LIGHT CARDINAL CURRY (GS) [554725-201]",
-  theme: "/91-7329.jpg",
+  theme: "91-7329.jpg",
   images: ["/91-7329.jpg", "/91-7329.jpg", "/91-7329.jpg"],
   price: 4200000,
   promotion: 30,
   category: "AIR JORDAN 6",
-  brand: "AIR JORDAN",
+  brand: {name: "Nike", slug: "nike"},
   productSizes: ["40.0", "40.5", "41.0", "42.0", "43.0"],
   status: "available",
   description: "",
 };
 
-export default function Shop() {
+export const getStaticProps : GetStaticProps = async () => {
+  await dbConnector()
+
+  const products = await ProductModel.find()
+
+  return {
+    props: {
+      products: JSON.parse(JSON.stringify(products))
+    }
+  }
+} 
+
+export default function Shop<NextPage>({products}) {
+  console.log(products)
   return (
     <>
       <Head>

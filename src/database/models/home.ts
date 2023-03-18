@@ -1,13 +1,13 @@
-import { model, models, Schema } from "mongoose";
+import { Document, model, models, Schema } from "mongoose";
 
-export interface IHomeSchema {
+export interface IHomeSchema extends Document {
   category_slider: Array<{ theme: String; title: String }>;
   newest_products_slider: Array<Schema.Types.ObjectId>;
   top_products_slider: Array<Schema.Types.ObjectId>;
   blogs: Array<Schema.Types.ObjectId>;
 }
 
-const homeSchema = new Schema<IHomeSchema>({
+const HomeSchema = new Schema<IHomeSchema>({
   category_slider: [
     {
       theme: String,
@@ -17,22 +17,22 @@ const homeSchema = new Schema<IHomeSchema>({
   newest_products_slider: [
     {
       type: Schema.Types.ObjectId,
-      ref: "product",
+      ref: "Product",
     },
   ],
   top_products_slider: [
     {
       type: Schema.Types.ObjectId,
-      ref: "product",
+      ref: "Product",
     },
   ],
   blogs: [
     {
       type: Schema.Types.ObjectId,
-      ref: "blog",
+      ref: "Blog",
     },
   ],
 });
 
-const homeModel = models.home || model("home", homeSchema);
-export default homeModel;
+const HomeModel = models.Home || model("Home", HomeSchema);
+export default HomeModel;

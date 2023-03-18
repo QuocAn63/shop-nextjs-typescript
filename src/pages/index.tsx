@@ -8,12 +8,8 @@ import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import dbConnector from "@/database";
 import homeModel from "@/database/models/home";
-import type { IBlogSchema } from "@/database/models/blog";
-import type { IProductSchema} from '../database/models/product'
-import { NextPage } from "next";
+import { GetStaticProps, NextPage } from "next";
 import { HomeInterface } from "@/interfaces/Home";
-import { ProductInterface } from "@/interfaces";
-import blogModel from "@/database/models/blog";
 
 type homePropsType = {
   homeProps: HomeInterface
@@ -27,6 +23,8 @@ export default function Home({ homeProps, ...props }: homePropsType) {
   const PrevButton = ({ currentSlide, slideCount, ...props }: any) => {
     return <LeftCircleOutlined {...props} />;
   };
+
+  console.log(homeProps)
   
   return (
     <>
@@ -173,13 +171,73 @@ export default function Home({ homeProps, ...props }: homePropsType) {
   );
 }
 
-export async function getServerSideProps() {
+export const getStaticProps : GetStaticProps = async () => {
     await dbConnector()
-    const homeProps = await homeModel.findOne({}).populate<{newest_products_slider: IProductSchema, top_products_slider: IProductSchema, blogs: IBlogSchema}>(["newest_products_slider", "top_products_slider", "blogs"])
-    
+    const homeProps = await homeModel.aggregate([{
+      $lookup: {
+        from: "products",
+        localField: "newest_products_slider",
+        foreignField: "_id",
+        as: "newest_products_slider",
+        pipeline: [
+          {
+            $lookup: {
+              from: "brands",
+              localField: "brand",
+              foreignField: "slug",
+              as: "brand"
+            }
+          },
+          {
+            $unwind: "$brand"
+          }
+        ]
+      }
+    }, {
+      $lookup: {
+        from: "products",
+        localField: "top_products_slider",
+        foreignField: "_id",
+        as: "top_products_slider",
+        pipeline: [
+          {
+            $lookup: {
+              from: "brands",
+              localField: "brand",
+              foreignField: "slug",
+              as: "brand"
+            }
+          },
+          {
+            $unwind: "$brand"
+          }
+        ]
+      }
+    }, {
+      $lookup: {
+        from: "blogs",
+        localField: "blogs",
+        foreignField: "_id",
+        as: "blogs",
+        pipeline: [
+          {
+            $lookup: {
+              from: "staffs",
+              localField: "author",
+              foreignField: "_id",
+              as: "author"
+            }
+          },
+          {
+            $unwind: "$author"
+          }
+        ]
+      }
+    }]) 
+
     return {
       props: {
-        homeProps: JSON.parse(JSON.stringify(homeProps))
+        homeProps: JSON.parse(JSON.stringify(...homeProps))
       }
     }
 }

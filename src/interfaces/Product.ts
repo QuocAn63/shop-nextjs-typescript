@@ -6,7 +6,7 @@ export interface ProductInterface {
   price: number;
   promotion: number;
   category: string;
-  brand: string;
+  brand: {name: string, slug: string};
   productSizes: string[];
   status: "available" | "outofstock";
   description: string;

@@ -1,6 +1,6 @@
-import mongoose, { model, Schema, Types } from "mongoose";
+import mongoose, { Document, model, Schema, Types } from "mongoose";
 
-export interface IBlogSchema {
+export interface IBlogSchema extends Document {
     title: String
     slug: String
     theme: String
@@ -8,7 +8,7 @@ export interface IBlogSchema {
     author: Types.ObjectId
 }
 
-const blogSchema = new Schema<IBlogSchema>({
+const BlogSchema = new Schema<IBlogSchema>({
       title: {
         type: String,
         required: true
@@ -27,9 +27,9 @@ const blogSchema = new Schema<IBlogSchema>({
       },
       author:{
         type: Schema.Types.ObjectId,
-        ref: "staff"
+        ref: "Staff"
       }
 })
 
-const blogModel = mongoose.models.blog || model("blog", blogSchema)
-export default blogModel
+const BlogModel = mongoose.models.Blog || model("Blog", BlogSchema)
+export default BlogModel
