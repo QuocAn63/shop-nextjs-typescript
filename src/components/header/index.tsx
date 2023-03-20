@@ -1,6 +1,6 @@
 import { Dropdown, Image, Input, Menu } from "antd";
 import Link from "next/link";
-import { FC, Fragment, ReactNode, useEffect } from "react";
+import { FC, Fragment, ReactNode, useEffect, useState } from "react";
 import {
   CloseOutlined,
   SearchOutlined,
@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 import styles from "./header.module.scss";
 import Cart from "../cart";
+import { useQueryParam } from "@/hooks";
 type navItemChildrenProps = {
   key: string;
   label: string | ReactNode;
@@ -188,6 +189,23 @@ const Header = () => {
     }
   };
 
+  const bindingPressingEnterEvent = (mode: "focus" | "blur") => {
+    const listenPressingEnterCb = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        router.push(pathname + "?" + createQueryString("keyword", searchValue));
+      }
+    };
+    if (mode === "focus") {
+      console.log("focus");
+      window.addEventListener("keydown", listenPressingEnterCb);
+    } else {
+      console.log("blur");
+      window.removeEventListener("keydown", listenPressingEnterCb);
+    }
+  };
+
+  const { router, pathname, createQueryString } = useQueryParam();
+  const [searchValue, setSearchValue] = useState<string>("");
   useEffect(() => {
     handleNavigationScroll();
 
@@ -208,11 +226,22 @@ const Header = () => {
         <div className="h-full flex items-center justify-center">
           <div className="flex-[0.6] h-8">
             <div className="flex items-center">
-              <button className="px-3 flex items-center shadow-none">
+              <button
+                className="px-3 flex items-center shadow-none"
+                onClick={() =>
+                  router.push(
+                    pathname + "?" + createQueryString("keyword", searchValue)
+                  )
+                }
+              >
                 <SearchOutlined className="text-xl" />
               </button>
               <Input
                 placeholder="Search your item"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onFocus={() => bindingPressingEnterEvent("focus")}
+                onBlur={() => bindingPressingEnterEvent("blur")}
                 className="font-semibold px-5 border rounded-none border-gray-800 hover:border-gray-800 focus:border-gray-800 focus:shadow-none"
               />
             </div>

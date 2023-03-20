@@ -12,8 +12,8 @@ import { GetStaticProps, NextPage } from "next";
 import { HomeInterface } from "@/interfaces/Home";
 
 type homePropsType = {
-  homeProps: HomeInterface
-} & NextPage
+  homeProps: HomeInterface;
+} & NextPage;
 
 export default function Home({ homeProps, ...props }: homePropsType) {
   const NextButton = ({ currentSlide, slideCount, ...props }: any) => {
@@ -24,8 +24,6 @@ export default function Home({ homeProps, ...props }: homePropsType) {
     return <LeftCircleOutlined {...props} />;
   };
 
-  console.log(homeProps)
-  
   return (
     <>
       <Head>
@@ -41,34 +39,33 @@ export default function Home({ homeProps, ...props }: homePropsType) {
             id="categoriesPanel"
             className={styles.contentSection}
           >
-            {
-                homeProps.category_slider.map(category => <Col span={6} key={category.title as string}>
-              
-                  <Link
-                    href="/"
-                    title="Air Jordan 1"
-                    className={"relative block " + styles.categoryTab}
-                    
+            {homeProps.category_slider.map((category) => (
+              <Col span={6} key={category.title as string}>
+                <Link
+                  href="/"
+                  title="Air Jordan 1"
+                  className={"relative block " + styles.categoryTab}
+                >
+                  <div className="overflow-hidden">
+                    <Image
+                      className={styles.categoryTab_theme}
+                      src={category.theme as string}
+                      alt={category.title as string}
+                      preview={false}
+                    />
+                  </div>
+                  <Typography.Title
+                    level={4}
+                    className={
+                      "bg-white bottom-0 absolute text-center left-3 right-3 text-sm " +
+                      styles.categoryTab_title
+                    }
                   >
-                    <div className="overflow-hidden">
-                      <Image
-                        className={styles.categoryTab_theme}
-                        src={category.theme as string}
-                        alt={category.title as string}
-                        preview={false}
-                      />
-                    </div>
-                    <Typography.Title
-                      level={4}
-                      className={
-                        "bg-white bottom-0 absolute text-center left-3 right-3 text-sm " +
-                        styles.categoryTab_title
-                      }
-                    >
-                      {category.title}
-                    </Typography.Title>
-                  </Link>
-                </Col>)              }
+                    {category.title}
+                  </Typography.Title>
+                </Link>
+              </Col>
+            ))}
           </Row>
           <Row gutter={16} id="newReleases" className={styles.contentSection}>
             <Col span={24}>
@@ -88,9 +85,9 @@ export default function Home({ homeProps, ...props }: homePropsType) {
                 prevArrow={<PrevButton />}
                 nextArrow={<NextButton />}
               >
-                                {
-                  homeProps.newest_products_slider.map((product) => <Product key={product.modelId} {...product} />)
-                }
+                {homeProps.newest_products_slider.map((product) => (
+                  <Product key={product.modelId} {...product} />
+                ))}
               </Carousel>
             </Col>
           </Row>
@@ -112,9 +109,9 @@ export default function Home({ homeProps, ...props }: homePropsType) {
                 prevArrow={<PrevButton />}
                 nextArrow={<NextButton />}
               >
-                {
-                  homeProps.top_products_slider.map((product) => <Product key={product.modelId} {...product} />)
-                }
+                {homeProps.top_products_slider.map((product) => (
+                  <Product key={product.modelId} {...product} />
+                ))}
               </Carousel>
             </Col>
           </Row>
@@ -127,11 +124,11 @@ export default function Home({ homeProps, ...props }: homePropsType) {
                 BLOGS
               </Typography.Title>
             </Col>
-            {
-              homeProps.blogs.map(blog => <Col span={8} key={blog.slug}>
+            {homeProps.blogs.map((blog) => (
+              <Col span={8} key={blog.slug}>
                 <Blog {...blog} />
-              </Col>)
-            }
+              </Col>
+            ))}
             <Col span={24} className="text-center mt-8">
               <Link href="/1">View more</Link>
             </Col>
@@ -171,9 +168,10 @@ export default function Home({ homeProps, ...props }: homePropsType) {
   );
 }
 
-export const getStaticProps : GetStaticProps = async () => {
-    await dbConnector()
-    const homeProps = await homeModel.aggregate([{
+export const getStaticProps: GetStaticProps = async () => {
+  await dbConnector();
+  const homeProps = await homeModel.aggregate([
+    {
       $lookup: {
         from: "products",
         localField: "newest_products_slider",
@@ -185,15 +183,16 @@ export const getStaticProps : GetStaticProps = async () => {
               from: "brands",
               localField: "brand",
               foreignField: "slug",
-              as: "brand"
-            }
+              as: "brand",
+            },
           },
           {
-            $unwind: "$brand"
-          }
-        ]
-      }
-    }, {
+            $unwind: "$brand",
+          },
+        ],
+      },
+    },
+    {
       $lookup: {
         from: "products",
         localField: "top_products_slider",
@@ -205,15 +204,16 @@ export const getStaticProps : GetStaticProps = async () => {
               from: "brands",
               localField: "brand",
               foreignField: "slug",
-              as: "brand"
-            }
+              as: "brand",
+            },
           },
           {
-            $unwind: "$brand"
-          }
-        ]
-      }
-    }, {
+            $unwind: "$brand",
+          },
+        ],
+      },
+    },
+    {
       $lookup: {
         from: "blogs",
         localField: "blogs",
@@ -225,19 +225,20 @@ export const getStaticProps : GetStaticProps = async () => {
               from: "staffs",
               localField: "author",
               foreignField: "_id",
-              as: "author"
-            }
+              as: "author",
+            },
           },
           {
-            $unwind: "$author"
-          }
-        ]
-      }
-    }]) 
+            $unwind: "$author",
+          },
+        ],
+      },
+    },
+  ]);
 
-    return {
-      props: {
-        homeProps: JSON.parse(JSON.stringify(...homeProps))
-      }
-    }
-}
+  return {
+    props: {
+      homeProps: JSON.parse(JSON.stringify(...homeProps)),
+    },
+  };
+};

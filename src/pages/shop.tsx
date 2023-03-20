@@ -5,10 +5,9 @@ import dbConnector from "@/database";
 import ProductModel from "@/database/models/product";
 import { ProductInterface } from "@/interfaces";
 import { Col, Pagination, Row } from "antd";
-import { GetStaticProps } from "next";
+import { GetServerSideProps } from "next";
 import Head from "next/head";
-import { Suspense } from "react";
-import Loading from "./loading";
+import useQueryParam from "@/hooks/useQueryParam";
 
 type sidebarOptionProps = {
   key: string;
@@ -20,6 +19,7 @@ export type sidebarItemProps = {
   key: string;
   label: string;
   type: "checkbox" | "radio";
+  slug: string;
   options: Array<sidebarOptionProps>;
 };
 
@@ -28,6 +28,7 @@ const SidebarItems = {
     key: "brands",
     label: "Brands",
     type: "checkbox",
+    slug: "brands",
     options: [
       {
         key: "nike",
@@ -47,7 +48,7 @@ const SidebarItems = {
       {
         key: "reebok",
         label: "Reebok",
-        value: "Reebok",
+        value: "reebok",
       },
       {
         key: "jordan",
@@ -60,6 +61,7 @@ const SidebarItems = {
     key: "sizes",
     label: "Sizes",
     type: "checkbox",
+    slug: "sizes",
     options: [
       {
         key: "30.0",
@@ -102,6 +104,7 @@ const SidebarItems = {
     key: "priceRange",
     label: "Price Range",
     type: "radio",
+    slug: "range",
     options: [
       {
         key: "1",
@@ -132,34 +135,44 @@ const SidebarItems = {
   } as sidebarItemProps,
 };
 
-const productItem: ProductInterface = {
-  modelId: "air_jordan_1_mid_light",
-  name: "AIR JORDAN 1 MID LIGHT CARDINAL CURRY (GS) [554725-201]",
-  theme: "91-7329.jpg",
-  images: ["/91-7329.jpg", "/91-7329.jpg", "/91-7329.jpg"],
-  price: 4200000,
-  promotion: 30,
-  category: "AIR JORDAN 6",
-  brand: {name: "Nike", slug: "nike"},
-  productSizes: ["40.0", "40.5", "41.0", "42.0", "43.0"],
-  status: "available",
-  description: "",
-};
-
-export const getStaticProps : GetStaticProps = async () => {
-  await dbConnector()
-
-  const products = await ProductModel.find()
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  await dbConnector();
+  console.log(
+    Object.keys(context.query).reduce((cur, key) => {
+      let queryKeys = (context.query[key] as string).split(",");
+      context.query[key] = queryKeys;
+      return {
+        ...cur,
+        [key]: queryKeys,
+      };
+    }, {})
+  );
+  const products = await ProductModel.aggregate([
+    {
+      $lookup: {
+        from: "brands",
+        localField: "brand",
+        foreignField: "slug",
+        as: "brand",
+      },
+    },
+    { $unwind: "$brand" },
+  ]);
 
   return {
     props: {
-      products: JSON.parse(JSON.stringify(products))
-    }
-  }
-} 
+      products: JSON.parse(JSON.stringify(products)),
+    },
+  };
+};
 
-export default function Shop<NextPage>({products}) {
-  console.log(products)
+interface ShopProps {
+  products: ProductInterface[];
+}
+
+export default function Shop<NextPage>({ products, ...props }: ShopProps) {
+  const { router, pathname, searchParams, createQueryString } = useQueryParam();
+
   return (
     <>
       <Head>
@@ -180,28 +193,26 @@ export default function Shop<NextPage>({products}) {
             </Col>
             <Col span={20}>
               <Row gutter={16}>
-                <Col span={6}>
-                  <Product {...productItem} />
-                </Col>
-                <Col span={6}>
-                  <Product {...productItem} />
-                </Col>
-                <Col span={6}>
-                  <Product {...productItem} />
-                </Col>
-                <Col span={6}>
-                  <Product {...productItem} />
-                </Col>
-                <Col span={6}>
-                  <Product {...productItem} />
-                </Col>
-                <Col span={6}>
-                  <Product {...productItem} />
-                </Col>
+                {products.map((product) => (
+                  <Col key={product.modelId} span={6}>
+                    <Product {...product} />
+                  </Col>
+                ))}
               </Row>
               <Row className="mt-20">
                 <Col span={24} className="flex justify-center">
-                  <Pagination defaultCurrent={1} total={100} />
+                  <Pagination
+                    showSizeChanger={false}
+                    defaultCurrent={1}
+                    total={100}
+                    onChange={(page) =>
+                      router.push(
+                        pathname +
+                          "?" +
+                          createQueryString("page", page.toString())
+                      )
+                    }
+                  />
                 </Col>
               </Row>
             </Col>

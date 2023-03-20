@@ -1,9 +1,10 @@
-import { Checkbox, Radio, Space } from "antd";
+import { Checkbox, Radio, RadioChangeEvent, Space } from "antd";
 import { FC } from "react";
 import classNames from "classnames";
 import styles from "./shopSidebar.module.scss";
 import type { sidebarItemProps } from "@/pages/shop";
-
+import { CheckboxValueType } from "antd/es/checkbox/Group";
+import useQueryParam from "@/hooks/useQueryParam";
 type ShopSidebarProps = {
   brands: sidebarItemProps;
   sizes: sidebarItemProps;
@@ -16,9 +17,30 @@ const ShopSidebar: FC<ShopSidebarProps> = ({
   priceRange,
   ...props
 }) => {
-  const ShopSidebarItem: FC<sidebarItemProps> = ({ label, options, type }) => {
+  const { router, pathname, searchParams, createQueryString } = useQueryParam();
+  const ShopSidebarItem: FC<sidebarItemProps> = ({
+    label,
+    options,
+    type,
+    slug,
+  }) => {
     let GroupComponent: any = Checkbox.Group;
     let OptionComponent: any = Checkbox;
+    const paramValues =
+      type === "radio"
+        ? searchParams.get(slug)
+        : searchParams.get(slug)?.split(",");
+    const handleOnChange = (event: CheckboxValueType[] | RadioChangeEvent) => {
+      let value;
+
+      if (Array.isArray(event)) {
+        value = [...event];
+      } else {
+        value = event.target.value;
+      }
+
+      router.push(pathname + "?" + createQueryString(slug, value));
+    };
 
     if (type === "radio") {
       GroupComponent = Radio.Group;
@@ -34,7 +56,7 @@ const ShopSidebar: FC<ShopSidebarProps> = ({
           <div
             className={classNames("flex flex-col", styles["option-container"])}
           >
-            <GroupComponent>
+            <GroupComponent onChange={handleOnChange} value={paramValues}>
               <Space direction="vertical">
                 {options.map((option) => (
                   <OptionComponent
