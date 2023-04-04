@@ -77,7 +77,6 @@ const Checkout = () => {
       <header>
         <title>Sneaker Store - Checkout</title>
       </header>
-      <Layout>
         <Row gutter={40}>
           <Col span={24}>
             <div className="flex gap-2 items-end pb-5">
@@ -130,7 +129,6 @@ const Checkout = () => {
             </div>
           </Col>
         </Row>
-      </Layout>
     </>
   );
 };

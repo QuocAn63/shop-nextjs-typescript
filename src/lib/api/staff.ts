@@ -1,4 +1,4 @@
-export interface StaffInterface {
+export interface StaffProps {
     username: string
     displayName: string
 }

@@ -1,10 +1,8 @@
 import DangerouslyHTML from "@/components/dangerouslyHTML";
-import Layout from "@/components/layout";
-import { Blog } from "@/interfaces/Blog";
 import { Col, Row } from "antd";
 import { FC } from "react";
 
-const BlogItem : Blog = {
+const BlogItem = {
   id: "1",
   slug: "blog-item-1",
   theme: "/643333-7297.jpg",
@@ -21,7 +19,6 @@ const Blog: FC = () => {
         <title>{BlogItem.title}</title>
       </header>
       <main>
-        <Layout>
           <Row >
             <Col span={4}>
 
@@ -38,7 +35,6 @@ const Blog: FC = () => {
             <Col span={4}>
             </Col>
           </Row>
-        </Layout>
       </main>
     </>
   );

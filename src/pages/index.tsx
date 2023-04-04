@@ -6,16 +6,18 @@ import styles from "@/styles/home.module.scss";
 import Blog from "@/components/blog";
 import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import Link from "next/link";
-import dbConnector from "@/database";
-import homeModel from "@/database/models/home";
 import { GetStaticProps, NextPage } from "next";
-import { HomeInterface } from "@/interfaces/Home";
+import clientPromise from "@/lib/mongodb";
+import { getNewestProducts, getTopProducts } from "@/lib/api/product";
+import { getNewestBlogs } from "@/lib/api/blog";
+import { HomeProps, getHomeCategories } from "@/lib/api/home";
 
 type homePropsType = {
-  homeProps: HomeInterface;
+  homeProps: HomeProps;
 } & NextPage;
 
 export default function Home({ homeProps, ...props }: homePropsType) {
+  console.log(homeProps)
   const NextButton = ({ currentSlide, slideCount, ...props }: any) => {
     return <RightCircleOutlined {...props} />;
   };
@@ -33,13 +35,12 @@ export default function Home({ homeProps, ...props }: homePropsType) {
         <link rel="icon" href="/main-logo.jpg" />
       </Head>
       <main>
-        <Layout>
           <Row
             gutter={16}
             id="categoriesPanel"
             className={styles.contentSection}
           >
-            {homeProps.category_slider.map((category) => (
+            {homeProps.homeCategories.map((category) => (
               <Col span={6} key={category.title as string}>
                 <Link
                   href="/"
@@ -85,7 +86,7 @@ export default function Home({ homeProps, ...props }: homePropsType) {
                 prevArrow={<PrevButton />}
                 nextArrow={<NextButton />}
               >
-                {homeProps.newest_products_slider.map((product) => (
+                {homeProps.newestProducts.map((product) => (
                   <Product key={product.modelId} {...product} />
                 ))}
               </Carousel>
@@ -109,7 +110,7 @@ export default function Home({ homeProps, ...props }: homePropsType) {
                 prevArrow={<PrevButton />}
                 nextArrow={<NextButton />}
               >
-                {homeProps.top_products_slider.map((product) => (
+                {homeProps.topProducts.map((product) => (
                   <Product key={product.modelId} {...product} />
                 ))}
               </Carousel>
@@ -124,7 +125,7 @@ export default function Home({ homeProps, ...props }: homePropsType) {
                 BLOGS
               </Typography.Title>
             </Col>
-            {homeProps.blogs.map((blog) => (
+            {homeProps.newestBlogs.map((blog) => (
               <Col span={8} key={blog.slug}>
                 <Blog {...blog} />
               </Col>
@@ -162,83 +163,26 @@ export default function Home({ homeProps, ...props }: homePropsType) {
               </div>
             </Col>
           </Row>
-        </Layout>
       </main>
     </>
   );
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  await dbConnector();
-  const homeProps = await homeModel.aggregate([
-    {
-      $lookup: {
-        from: "products",
-        localField: "newest_products_slider",
-        foreignField: "_id",
-        as: "newest_products_slider",
-        pipeline: [
-          {
-            $lookup: {
-              from: "brands",
-              localField: "brand",
-              foreignField: "slug",
-              as: "brand",
-            },
-          },
-          {
-            $unwind: "$brand",
-          },
-        ],
-      },
-    },
-    {
-      $lookup: {
-        from: "products",
-        localField: "top_products_slider",
-        foreignField: "_id",
-        as: "top_products_slider",
-        pipeline: [
-          {
-            $lookup: {
-              from: "brands",
-              localField: "brand",
-              foreignField: "slug",
-              as: "brand",
-            },
-          },
-          {
-            $unwind: "$brand",
-          },
-        ],
-      },
-    },
-    {
-      $lookup: {
-        from: "blogs",
-        localField: "blogs",
-        foreignField: "_id",
-        as: "blogs",
-        pipeline: [
-          {
-            $lookup: {
-              from: "staffs",
-              localField: "author",
-              foreignField: "_id",
-              as: "author",
-            },
-          },
-          {
-            $unwind: "$author",
-          },
-        ],
-      },
-    },
-  ]);
+  try {
+    await clientPromise
+  } catch (err) {
 
+  }
+
+  const homeCategories = await getHomeCategories()
+  const newestProducts = await getNewestProducts()
+  const topProducts = await getTopProducts()
+  const newestBlogs = await getNewestBlogs()
+  
   return {
     props: {
-      homeProps: JSON.parse(JSON.stringify(...homeProps)),
+      homeProps: JSON.parse(JSON.stringify({homeCategories, newestProducts, topProducts, newestBlogs})),
     },
   };
 };

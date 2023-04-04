@@ -9,6 +9,7 @@ import {
 import styles from "./header.module.scss";
 import Cart from "../cart";
 import { useQueryParam } from "@/hooks";
+import { BrandProps } from "@/lib/api/brand";
 type navItemChildrenProps = {
   key: string;
   label: string | ReactNode;
@@ -25,7 +26,8 @@ type navItemProps = {
   onClick?: () => void;
 };
 
-const Header = () => {
+const Header = ({ brands }: {brands: BrandProps[]}) => {
+  
   const leftItems: Array<navItemProps> = [
     {
       key: "home",
@@ -35,40 +37,24 @@ const Header = () => {
     {
       key: "brands",
       label: "Brands",
-      itemchildren: [
-        {
-          key: "nike",
-          label: "Nike",
-          href: "/nike",
-        },
-        {
-          key: "airjordan",
-          label: "Air Jordan",
-          href: "/airjordan",
-          children: [
-            {
-              key: "airjordan1",
-              label: "Air Jordan 1",
-              href: "/airjordan1",
-            },
-          ],
-        },
-        {
-          key: "adidas",
-          label: "Adidas",
-          href: "/adidas",
-        },
-        {
-          key: "puma",
-          label: "Puma",
-          href: "/puma",
-        },
-        {
-          key: "reebok",
-          label: "Reebok",
-          href: "/reebok",
-        },
-      ],
+      itemchildren: brands.map(brand => {
+        const props : navItemChildrenProps = {
+          key: brand.slug,
+          label: brand.name,
+          href: "/shop?brand=" + brand.slug
+        }
+
+        if(brand.categories) {
+          props.children = brand.categories.map(category => ({
+            key: category.slug,
+            label: category.name,
+            href: "/shop?brand=" +category.slug
+          }))
+        }
+
+        return props
+      })
+
     },
     {
       key: "shop",
@@ -196,10 +182,8 @@ const Header = () => {
       }
     };
     if (mode === "focus") {
-      console.log("focus");
       window.addEventListener("keydown", listenPressingEnterCb);
     } else {
-      console.log("blur");
       window.removeEventListener("keydown", listenPressingEnterCb);
     }
   };

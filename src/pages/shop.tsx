@@ -1,13 +1,12 @@
-import Layout from "@/components/layout";
 import Product from "@/components/product";
 import { ShopSidebar } from "@/components/sidebar";
-import dbConnector from "@/database";
-import ProductModel from "@/database/models/product";
-import { ProductInterface } from "@/interfaces";
 import { Col, Pagination, Row } from "antd";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 import useQueryParam from "@/hooks/useQueryParam";
+import clientPromise from "@/lib/mongodb";
+import { ProductProps, getProducts } from "@/lib/api/product";
+import { BrandProps, getAllBrands } from "@/lib/api/brand";
 
 type sidebarOptionProps = {
   key: string;
@@ -136,41 +135,37 @@ const SidebarItems = {
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  await dbConnector();
-  console.log(
-    Object.keys(context.query).reduce((cur, key) => {
-      let queryKeys = (context.query[key] as string).split(",");
-      context.query[key] = queryKeys;
-      return {
-        ...cur,
-        [key]: queryKeys,
-      };
-    }, {})
-  );
-  const products = await ProductModel.aggregate([
-    {
-      $lookup: {
-        from: "brands",
-        localField: "brand",
-        foreignField: "slug",
-        as: "brand",
-      },
-    },
-    { $unwind: "$brand" },
-  ]);
+  try {
+    await clientPromise
+  } catch(err) {
 
+  }
+
+  const queryParams = Object.keys(context.query).reduce((cur, key) => {
+    let queryKeys = (context.query[key] as string).split(",");
+    context.query[key] = queryKeys;
+    return {
+      ...cur,
+      [key]: queryKeys,
+    };
+  }, {})
+
+  const products = await getProducts(queryParams)
+  const brands = await getAllBrands()
   return {
     props: {
       products: JSON.parse(JSON.stringify(products)),
+      brands
     },
   };
 };
 
 interface ShopProps {
-  products: ProductInterface[];
+  products: ProductProps[];
+  brands: BrandProps[]
 }
 
-export default function Shop<NextPage>({ products, ...props }: ShopProps) {
+export default function Shop<NextPage>({ products, brands, ...props }: ShopProps) {
   const { router, pathname, searchParams, createQueryString } = useQueryParam();
 
   return (
@@ -182,11 +177,10 @@ export default function Shop<NextPage>({ products, ...props }: ShopProps) {
         <link rel="icon" href="/main-logo.jpg" />
       </Head>
       <main>
-        <Layout>
           <Row gutter={16}>
             <Col span={4}>
               <ShopSidebar
-                brands={SidebarItems.brands}
+                brands={brands}
                 sizes={SidebarItems.sizes}
                 priceRange={SidebarItems.priceRange}
               />
@@ -217,7 +211,6 @@ export default function Shop<NextPage>({ products, ...props }: ShopProps) {
               </Row>
             </Col>
           </Row>
-        </Layout>
       </main>
     </>
   );

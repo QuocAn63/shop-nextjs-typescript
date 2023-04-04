@@ -2,7 +2,7 @@ import { Image, ImageProps, Typography } from "antd";
 import { FC } from "react";
 import Currency from "../currency";
 import Link from "next/link";
-import { ProductInterface } from "@/interfaces";
+import { ProductProps } from "@/lib/api/product";
 
 type productStatus = {
   available: "Available";
@@ -12,8 +12,7 @@ type productStatus = {
 
 
 const Product: FC<
-  React.HTMLAttributes<HTMLElement & HTMLImageElement> &
-  ProductInterface &
+  React.HTMLAttributes<HTMLElement & HTMLImageElement> & ProductProps &
     ImageProps
 > = ({
   modelId,
@@ -24,7 +23,6 @@ const Product: FC<
   promotion,
   category,
   brand,
-  productSizes,
   status = "available",
   description = "",
 }) => {

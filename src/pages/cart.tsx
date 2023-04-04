@@ -108,7 +108,6 @@ const Cart: FC = () => {
         <title>Sneaker Store - Cart</title>
       </header>
       <main>
-        <Layout>
           <Row gutter={16}>
             <Col span={24}>
               <div className="flex gap-2 items-end pb-5">
@@ -155,7 +154,6 @@ const Cart: FC = () => {
               </aside>
             </Col>
           </Row>
-        </Layout>
       </main>
     </>
   );

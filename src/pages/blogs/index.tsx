@@ -1,10 +1,9 @@
 import HorizontalBlogItem from "@/components/blog/horizontalBlog";
 import Layout from "@/components/layout";
-import { Blog } from "@/interfaces/Blog";
 import { Col, Pagination, Row, Space } from "antd";
 import { FC } from "react";
 
-const BlogItem : Blog = {
+const BlogItem  = {
   id: "1",
   slug: "blog-item-1",
   theme: "/643333-7297.jpg",
@@ -21,7 +20,6 @@ const Blogs: FC = () => {
         <title>Sneaker Store - Blogs</title>
       </header>
       <main>
-        <Layout>
           <Row gutter={16}>
             <Col span={16}>
               <Space direction="vertical" size={20}>
@@ -40,7 +38,6 @@ const Blogs: FC = () => {
               <div className="px-8"></div>
             </Col>
           </Row>
-        </Layout>
       </main>
     </>
   );

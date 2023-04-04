@@ -9,7 +9,6 @@ const About: NextPage = () => {
         <title>Sneaker Store - About</title>
       </header>
       <main>
-        <Layout>
           <h3 className="font-semibold text-lg">About us</h3>
           <p>
             Lorem ipsum dolor sit, amet consectetur adipisicing elit. Velit
@@ -17,7 +16,6 @@ const About: NextPage = () => {
             esse dolor in rem error reiciendis! Maxime aperiam praesentium
             facilis id.
           </p>
-        </Layout>
       </main>
     </>
   );

@@ -76,7 +76,6 @@ const Product = ({
       <header>
         <title>Sneaker Store - Product</title>
       </header>
-      <Layout>
         <Row gutter={40}>
           <Col span={12}>
             <div className="px-10">
@@ -136,7 +135,6 @@ const Product = ({
             </div>
           </Col>
         </Row>
-      </Layout>
     </>
   );
 };
