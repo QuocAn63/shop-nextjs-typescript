@@ -23,43 +23,10 @@ export type sidebarItemProps = {
 };
 
 const SidebarItems = {
-  brands: {
-    key: "brands",
-    label: "Brands",
-    type: "checkbox",
-    slug: "brands",
-    options: [
-      {
-        key: "nike",
-        label: "Nike",
-        value: "nike",
-      },
-      {
-        key: "adidas",
-        label: "Adidas",
-        value: "adidas",
-      },
-      {
-        key: "puma",
-        label: "Puma",
-        value: "puma",
-      },
-      {
-        key: "reebok",
-        label: "Reebok",
-        value: "reebok",
-      },
-      {
-        key: "jordan",
-        label: "Jordan",
-        value: "jordan",
-      },
-    ],
-  } as sidebarItemProps,
   sizes: {
     key: "sizes",
     label: "Sizes",
-    type: "checkbox",
+    type: "radio",
     slug: "sizes",
     options: [
       {
@@ -136,10 +103,8 @@ const SidebarItems = {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
-    await clientPromise
-  } catch(err) {
-
-  }
+    await clientPromise;
+  } catch (err) {}
 
   const queryParams = Object.keys(context.query).reduce((cur, key) => {
     let queryKeys = (context.query[key] as string).split(",");
@@ -148,26 +113,40 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       ...cur,
       [key]: queryKeys,
     };
-  }, {})
+  }, {});
 
-  const products = await getProducts(queryParams)
-  const brands = await getAllBrands()
+  const products = await getProducts(queryParams);
+  const brands = await getAllBrands();
   return {
     props: {
       products: JSON.parse(JSON.stringify(products)),
-      brands
+      brands: JSON.parse(JSON.stringify(brands)),
     },
   };
 };
 
 interface ShopProps {
   products: ProductProps[];
-  brands: BrandProps[]
+  brands: BrandProps[];
 }
 
-export default function Shop<NextPage>({ products, brands, ...props }: ShopProps) {
+export default function Shop<NextPage>({
+  products,
+  brands,
+  ...props
+}: ShopProps) {
   const { router, pathname, searchParams, createQueryString } = useQueryParam();
-
+  const brandSidebarItems: sidebarItemProps = {
+    key: "brands",
+    label: "Brands",
+    slug: "brands",
+    type: "radio",
+    options: brands.map((brand) => ({
+      key: brand.slug,
+      label: brand.name,
+      value: brand.slug,
+    })),
+  };
   return (
     <>
       <Head>
@@ -177,40 +156,40 @@ export default function Shop<NextPage>({ products, brands, ...props }: ShopProps
         <link rel="icon" href="/main-logo.jpg" />
       </Head>
       <main>
-          <Row gutter={16}>
-            <Col span={4}>
-              <ShopSidebar
-                brands={brands}
-                sizes={SidebarItems.sizes}
-                priceRange={SidebarItems.priceRange}
-              />
-            </Col>
-            <Col span={20}>
-              <Row gutter={16}>
-                {products.map((product) => (
-                  <Col key={product.modelId} span={6}>
-                    <Product {...product} />
-                  </Col>
-                ))}
-              </Row>
-              <Row className="mt-20">
-                <Col span={24} className="flex justify-center">
-                  <Pagination
-                    showSizeChanger={false}
-                    defaultCurrent={1}
-                    total={100}
-                    onChange={(page) =>
-                      router.push(
-                        pathname +
-                          "?" +
-                          createQueryString("page", page.toString())
-                      )
-                    }
-                  />
+        <Row gutter={16}>
+          <Col span={4}>
+            <ShopSidebar
+              brands={brandSidebarItems}
+              sizes={SidebarItems.sizes}
+              priceRange={SidebarItems.priceRange}
+            />
+          </Col>
+          <Col span={20}>
+            <Row gutter={16}>
+              {products.map((product) => (
+                <Col key={product.modelId} span={6}>
+                  <Product {...product} />
                 </Col>
-              </Row>
-            </Col>
-          </Row>
+              ))}
+            </Row>
+            <Row className="mt-20">
+              <Col span={24} className="flex justify-center">
+                <Pagination
+                  showSizeChanger={false}
+                  defaultCurrent={1}
+                  total={100}
+                  onChange={(page) =>
+                    router.push(
+                      pathname +
+                        "?" +
+                        createQueryString("page", page.toString())
+                    )
+                  }
+                />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
       </main>
     </>
   );

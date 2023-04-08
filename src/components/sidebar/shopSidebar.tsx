@@ -24,12 +24,12 @@ const ShopSidebar: FC<ShopSidebarProps> = ({
     type,
     slug,
   }) => {
-    let GroupComponent: any = Checkbox.Group;
-    let OptionComponent: any = Checkbox;
     const paramValues =
       type === "radio"
         ? searchParams.get(slug)
         : searchParams.get(slug)?.split(",");
+    let GroupComponent: any = Checkbox.Group;
+    let OptionComponent: any = Checkbox;
     const handleOnChange = (event: CheckboxValueType[] | RadioChangeEvent) => {
       let value;
 

@@ -1,5 +1,5 @@
 import clientPromise from "@/lib/mongodb";
-import { AggregateOptions, MongoClient } from "mongodb";
+import { MongoClient } from "mongodb";
 
 export interface ProductProps {
   modelId: string;
@@ -17,11 +17,19 @@ export interface ProductProps {
 
 export interface ProductQueryKeysProps {
   page?: string;
-  brands?: string;
-  range?: string;
+  brands?: (queryKeys: ProductQueryKeysProps, cur: string) => object;
+  range?: (key: string | string[]) => object;
   size?: string;
   category?: string;
 }
+
+const ProductPriceRanges = {
+  "1": { $lt: 1000000 },
+  "2": { $gt: 1000000, $lt: 3000000 },
+  "3": { $gt: 3000000, $lt: 7000000 },
+  "4": { $gt: 7000000, $lt: 15000000 },
+  "5": { $gt: 15000000 },
+};
 
 export const getProduct = async (
   slug: string
@@ -43,9 +51,14 @@ export const getProduct = async (
 
 const searchKeys: ProductQueryKeysProps = {
   page: "page",
-  brands: "brand.slug",
+  brands: (queryKeys, cur) => ({
+    "brand.slug": { $in: queryKeys[cur as keyof ProductQueryKeysProps] },
+  }),
   category: "category.slug",
   size: "size",
+  range: (key) => ({
+    price: ProductPriceRanges[key as keyof typeof ProductPriceRanges],
+  }),
 };
 
 export const getProducts = async (
@@ -104,11 +117,10 @@ export const getProducts = async (
       },
     },
   ];
-
+  console.log(queryKeys);
   if (queryKeys)
     pipeline.push({
       $match: Object.keys(queryKeys).reduce((prev, cur: string) => {
-        console.log(cur);
         return {
           ...prev,
           [searchKeys[cur as keyof ProductQueryKeysProps] as string]: {
