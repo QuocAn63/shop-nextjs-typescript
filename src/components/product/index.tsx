@@ -10,24 +10,22 @@ type productStatus = {
   commingSoon: "Comming soon";
 };
 
-
-const Product: FC<
-  React.HTMLAttributes<HTMLElement & HTMLImageElement> & ProductProps &
-    ImageProps
-> = ({
+const Product: FC<ProductProps> = ({
   modelId,
   name,
   theme,
   images,
+  slug,
   price,
   promotion,
   category,
   brand,
   status = "available",
   description = "",
+  ...props
 }) => {
   return (
-    <Link href={`/product/${modelId}`}>
+    <Link href={`/product/${slug}`}>
       <div className="shadow-sm mt-4">
         <Image
           src={`/${theme}`}
@@ -39,7 +37,9 @@ const Product: FC<
           <Typography.Title level={4}>{brand.name}</Typography.Title>
           <Typography.Text className="text-sm">{name}</Typography.Text>
           <p>
-            <Currency promotion={promotion} space={6}>{price}</Currency>
+            <Currency promotion={promotion} space={6}>
+              {price}
+            </Currency>
           </p>
         </div>
       </div>

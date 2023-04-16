@@ -13,7 +13,7 @@ import { BrandProps } from "@/lib/api/brand";
 type navItemChildrenProps = {
   key: string;
   label: string | ReactNode;
-  href: string;
+  href?: string;
   children?: Array<navItemChildrenProps>;
   onClick?: () => void;
 };
@@ -26,8 +26,7 @@ type navItemProps = {
   onClick?: () => void;
 };
 
-const Header = ({ brands }: {brands: BrandProps[]}) => {
-  
+const Header = ({ brands }: { brands: BrandProps[] }) => {
   const leftItems: Array<navItemProps> = [
     {
       key: "home",
@@ -37,24 +36,25 @@ const Header = ({ brands }: {brands: BrandProps[]}) => {
     {
       key: "brands",
       label: "Brands",
-      itemchildren: brands.map(brand => {
-        const props : navItemChildrenProps = {
+      itemchildren: brands.map((brand) => {
+        const props: navItemChildrenProps = {
           key: brand.slug,
-          label: brand.name,
-          href: "/shop?brand=" + brand.slug
-        }
+          label: <Link href={"/shop?brands=" + brand.slug}>{brand.name}</Link>,
+        };
 
-        if(brand.categories) {
-          props.children = brand.categories.map(category => ({
+        if (brand.categories) {
+          props.children = brand.categories.map((category) => ({
             key: category.slug,
-            label: category.name,
-            href: "/shop?brand=" +category.slug
-          }))
+            label: (
+              <Link href={"/shop?category=" + category.slug}>
+                {category.name}
+              </Link>
+            ),
+          }));
         }
 
-        return props
-      })
-
+        return props;
+      }),
     },
     {
       key: "shop",

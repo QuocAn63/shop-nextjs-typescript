@@ -4,24 +4,53 @@ import { MongoClient } from "mongodb";
 export interface ProductProps {
   modelId: string;
   name: string;
+  slug: string;
   theme: string;
   images: string[];
   price: number;
   promotion: number;
   category: string;
   brand: { name: string; slug: string };
-  productSizes: string[];
+  sizes: string[];
   status: "available" | "outofstock";
   description: string;
 }
 
 export interface ProductQueryKeysProps {
-  page?: string;
-  brands?: (queryKeys: ProductQueryKeysProps, cur: string) => object;
-  range?: (key: string | string[]) => object;
-  size?: string;
-  category?: string;
+  page?: any;
+  brands?: any;
+  range?: any;
+  sizes?: any;
+  category?: any;
 }
+
+export interface ProductsWithMetadata {
+  metadata: [
+    {
+      total: number;
+      page: number;
+      pageSize: number;
+    }
+  ];
+  data: ProductProps[];
+}
+
+const ProductQueryFuncWithKeys = {
+  brands: (value: string[]) => ({
+    "brand.slug": {
+      $in: value,
+    },
+  }),
+  range: (value: string[]) => ({
+    price: ProductPriceRanges[value[0] as keyof typeof ProductPriceRanges],
+  }),
+  sizes: (value: string[]) => ({
+    sizes: value[0],
+  }),
+  category: (value: string[]) => ({
+    "category.slug": value[0],
+  }),
+};
 
 const ProductPriceRanges = {
   "1": { $lt: 1000000 },
@@ -49,24 +78,14 @@ export const getProduct = async (
   else return null;
 };
 
-const searchKeys: ProductQueryKeysProps = {
-  page: "page",
-  brands: (queryKeys, cur) => ({
-    "brand.slug": { $in: queryKeys[cur as keyof ProductQueryKeysProps] },
-  }),
-  category: "category.slug",
-  size: "size",
-  range: (key) => ({
-    price: ProductPriceRanges[key as keyof typeof ProductPriceRanges],
-  }),
-};
-
 export const getProducts = async (
-  queryKeys?: ProductQueryKeysProps
-): Promise<ProductProps[]> => {
+  queryKeys: ProductQueryKeysProps
+): Promise<ProductsWithMetadata> => {
   const client: MongoClient = await clientPromise;
   const collection = client.db("sneaker-store").collection("products");
-  const pipeline: any = [
+  const pageNum = queryKeys.page ? Number.parseInt(queryKeys.page[0]) : 1;
+
+  let pipeline: any = [
     {
       $limit: 20,
     },
@@ -111,26 +130,62 @@ export const getProducts = async (
     {
       $project: {
         _id: 0,
-        sizes: 0,
         description: 0,
         images: 0,
       },
     },
   ];
-  console.log(queryKeys);
-  if (queryKeys)
-    pipeline.push({
-      $match: Object.keys(queryKeys).reduce((prev, cur: string) => {
-        return {
-          ...prev,
-          [searchKeys[cur as keyof ProductQueryKeysProps] as string]: {
-            $in: queryKeys[cur as keyof ProductQueryKeysProps],
+
+  if (queryKeys) {
+    pipeline = [
+      ...pipeline,
+      {
+        $match: Object.keys(queryKeys).reduce((prev, cur: string) => {
+          if (
+            ProductQueryFuncWithKeys[
+              cur as keyof Omit<ProductQueryKeysProps, "page">
+            ] !== undefined
+          ) {
+            return {
+              ...prev,
+              ...ProductQueryFuncWithKeys[
+                cur as keyof Omit<ProductQueryKeysProps, "page">
+              ](queryKeys[cur as keyof Omit<ProductQueryKeysProps, "page">]),
+            };
+          } else return prev;
+        }, {}),
+      },
+    ];
+  }
+
+  pipeline = [
+    ...pipeline,
+    {
+      $facet: {
+        metadata: [
+          {
+            $count: "total",
           },
-        };
-      }, {}),
-    });
-  console.log(pipeline);
-  return (await collection.aggregate(pipeline).toArray()) as ProductProps[];
+          {
+            $addFields: {
+              page: pageNum,
+              pageSize: 20,
+            },
+          },
+        ],
+        data: [
+          {
+            $skip: 20 * (pageNum - 1),
+          },
+          {
+            $limit: 20,
+          },
+        ],
+      },
+    },
+  ];
+
+  return (await collection.aggregate(pipeline).next()) as any;
 };
 
 export const getNewestProducts = async (): Promise<ProductProps[]> => {

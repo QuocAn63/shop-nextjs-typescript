@@ -5,7 +5,11 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import useQueryParam from "@/hooks/useQueryParam";
 import clientPromise from "@/lib/mongodb";
-import { ProductProps, getProducts } from "@/lib/api/product";
+import {
+  ProductProps,
+  ProductsWithMetadata,
+  getProducts,
+} from "@/lib/api/product";
 import { BrandProps, getAllBrands } from "@/lib/api/brand";
 
 type sidebarOptionProps = {
@@ -24,7 +28,7 @@ export type sidebarItemProps = {
 
 const SidebarItems = {
   sizes: {
-    key: "sizes",
+    key: "size",
     label: "Sizes",
     type: "radio",
     slug: "sizes",
@@ -63,6 +67,31 @@ const SidebarItems = {
         key: "33.0",
         label: "33.0",
         value: "33.0",
+      },
+      {
+        key: "33.5",
+        label: "33.5",
+        value: "33.5",
+      },
+      {
+        key: "34.0",
+        label: "34.0",
+        value: "34.0",
+      },
+      {
+        key: "34.5",
+        label: "34.5",
+        value: "34.5",
+      },
+      {
+        key: "35.0",
+        label: "35.0",
+        value: "35.0",
+      },
+      {
+        key: "35.5",
+        label: "35.5",
+        value: "35.5",
       },
     ],
   } as sidebarItemProps,
@@ -105,7 +134,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     await clientPromise;
   } catch (err) {}
-
   const queryParams = Object.keys(context.query).reduce((cur, key) => {
     let queryKeys = (context.query[key] as string).split(",");
     context.query[key] = queryKeys;
@@ -117,15 +145,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const products = await getProducts(queryParams);
   const brands = await getAllBrands();
+  console.log(products);
   return {
     props: {
-      products: JSON.parse(JSON.stringify(products)),
+      products: products.data,
       brands: JSON.parse(JSON.stringify(brands)),
+      metadata: products.metadata,
     },
   };
 };
 
-interface ShopProps {
+interface ShopProps extends Pick<ProductsWithMetadata, "metadata"> {
   products: ProductProps[];
   brands: BrandProps[];
 }
@@ -133,6 +163,7 @@ interface ShopProps {
 export default function Shop<NextPage>({
   products,
   brands,
+  metadata,
   ...props
 }: ShopProps) {
   const { router, pathname, searchParams, createQueryString } = useQueryParam();
@@ -147,6 +178,7 @@ export default function Shop<NextPage>({
       value: brand.slug,
     })),
   };
+
   return (
     <>
       <Head>
@@ -177,7 +209,9 @@ export default function Shop<NextPage>({
                 <Pagination
                   showSizeChanger={false}
                   defaultCurrent={1}
-                  total={100}
+                  current={metadata[0].page}
+                  total={metadata[0].total}
+                  pageSize={metadata[0].pageSize}
                   onChange={(page) =>
                     router.push(
                       pathname +
