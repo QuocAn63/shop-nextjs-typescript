@@ -136,6 +136,7 @@ export const getProducts = async (
     },
   ];
 
+  // If have the query keys, loop to get the query for each query found
   if (queryKeys) {
     pipeline = [
       ...pipeline,
@@ -181,6 +182,32 @@ export const getProducts = async (
             $limit: 20,
           },
         ],
+      },
+    },
+    {
+      $project: {
+        data: 1,
+        metadata: {
+          $cond: {
+            if: {
+              $gt: [{ $size: "$data" }, 0],
+            },
+            then: [
+              {
+                total: { $arrayElemAt: ["$metadata.total", 0] },
+                page: pageNum,
+                pageSize: 20,
+              },
+            ],
+            else: [
+              {
+                total: 0,
+                page: pageNum,
+                pageSize: 20,
+              },
+            ],
+          },
+        },
       },
     },
   ];

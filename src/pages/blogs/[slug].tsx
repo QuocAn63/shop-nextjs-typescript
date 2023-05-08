@@ -24,6 +24,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const blog = await getBlog(slug as string);
 
+  if (!blog) {
+    return {
+      notFound: true,
+    };
+  }
+
   return {
     props: {
       blog: JSON.parse(JSON.stringify(blog)),
