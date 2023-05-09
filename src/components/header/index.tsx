@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 import styles from "./header.module.scss";
 import Cart from "../cart";
+import classNames from "classnames/bind";
 import { useQueryParam } from "@/hooks";
 import { BrandProps } from "@/lib/api/brand";
 type navItemChildrenProps = {
@@ -25,6 +26,8 @@ type navItemProps = {
   itemchildren?: Array<navItemChildrenProps>;
   onClick?: () => void;
 };
+
+const cx = classNames.bind(styles);
 
 const Header = ({ brands }: { brands: BrandProps[] }) => {
   const leftItems: Array<navItemProps> = [
@@ -141,6 +144,15 @@ const Header = ({ brands }: { brands: BrandProps[] }) => {
     searchModal?.classList.remove(styles.showModal);
   };
 
+  const handleClearSearchBox = () => {
+    setSearchValue("");
+  };
+
+  const handleClickToSearch = () => {
+    handleCloseSearchBar();
+    router.push("/shop?" + createQueryString("keyword", searchValue));
+  };
+
   const NavItem: FC<React.HTMLAttributes<HTMLAnchorElement> & navItemProps> = ({
     href,
     label,
@@ -178,7 +190,7 @@ const Header = ({ brands }: { brands: BrandProps[] }) => {
   const bindingPressingEnterEvent = (mode: "focus" | "blur") => {
     const listenPressingEnterCb = (event: KeyboardEvent) => {
       if (event.key === "Enter") {
-        router.push(pathname + "?" + createQueryString("keyword", searchValue));
+        router.push("/shop?" + createQueryString("keyword", searchValue));
       }
     };
     if (mode === "focus") {
@@ -188,7 +200,7 @@ const Header = ({ brands }: { brands: BrandProps[] }) => {
     }
   };
 
-  const { router, pathname, createQueryString } = useQueryParam();
+  const { router, pathname, searchParams, createQueryString } = useQueryParam();
   const [searchValue, setSearchValue] = useState<string>("");
   useEffect(() => {
     handleNavigationScroll();
@@ -199,24 +211,17 @@ const Header = ({ brands }: { brands: BrandProps[] }) => {
   return (
     <>
       <div
-        className="bg-black fixed top-0 left-0 right-0 bottom-0 z-40 opacity-0 transition-all invisible"
+        className={cx("seachOverlay")}
         id="seachOverlay"
         onClick={handleCloseSearchBar}
       ></div>
-      <div
-        className="bg-white fixed -top-[100px] left-0 right-0 z-50 h-[100px] opacity-0 transition-all"
-        id="searchModal"
-      >
+      <div className={cx("searchModal")} id="searchModal">
         <div className="h-full flex items-center justify-center">
           <div className="flex-[0.6] h-8">
             <div className="flex items-center">
               <button
                 className="px-3 flex items-center shadow-none"
-                onClick={() =>
-                  router.push(
-                    pathname + "?" + createQueryString("keyword", searchValue)
-                  )
-                }
+                onClick={handleClickToSearch}
               >
                 <SearchOutlined className="text-xl" />
               </button>
