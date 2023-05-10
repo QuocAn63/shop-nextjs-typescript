@@ -1,4 +1,4 @@
-import { MongoClient, Timestamp } from "mongodb";
+import { MongoClient } from "mongodb";
 import clientPromise from "../mongodb";
 import { ProductProps } from "./product";
 
@@ -22,7 +22,7 @@ export const createNewCart = async (): Promise<CartProps> => {
 export const updateCart = async (
   cartToken: string,
   cartProducts: CartProductItem[]
-): Promise<any> => {
+): Promise<CartProps | null> => {
   try {
     const client: MongoClient = await clientPromise;
     const collection = client.db("snaker-store").collection("carts");
@@ -31,7 +31,7 @@ export const updateCart = async (
       cartToken = (await createNewCart()).token;
     }
 
-    collection.findOneAndUpdate(
+    const cart: any = await collection.findOneAndUpdate(
       { token: cartToken },
       {
         $set: {
@@ -39,5 +39,10 @@ export const updateCart = async (
         },
       }
     );
-  } catch (err) {}
+
+    return cart;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 };

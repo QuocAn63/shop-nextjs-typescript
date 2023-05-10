@@ -200,7 +200,7 @@ const Header = ({ brands }: { brands: BrandProps[] }) => {
     }
   };
 
-  const { router, pathname, searchParams, createQueryString } = useQueryParam();
+  const { router, createQueryString } = useQueryParam();
   const [searchValue, setSearchValue] = useState<string>("");
   useEffect(() => {
     handleNavigationScroll();

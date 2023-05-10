@@ -44,7 +44,14 @@ const Cart: FC<ScriptProps> = ({ children }) => {
         </div>
       )}
     >
-      {children}
+      <div className="relative">
+        <>
+          {children}
+          <span className="absolute top-1 -right-1 bg-white rounded-full border-2 border-black w-4 h-4 flex items-center justify-center text-sm">
+            3
+          </span>
+        </>
+      </div>
     </Dropdown>
   );
 };
