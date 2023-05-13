@@ -11,6 +11,7 @@ import Cart from "../cart";
 import classNames from "classnames/bind";
 import { useQueryParam } from "@/hooks";
 import { BrandProps } from "@/lib/api/brand";
+import { CartProps } from "@/lib/api/cart";
 type navItemChildrenProps = {
   key: string;
   label: string | ReactNode;
@@ -29,7 +30,12 @@ type navItemProps = {
 
 const cx = classNames.bind(styles);
 
-const Header = ({ brands }: { brands: BrandProps[] }) => {
+export type HeaderProps = {
+  brands?: BrandProps[];
+  cart?: CartProps;
+};
+
+const Header = ({ brands = [], cart }: HeaderProps) => {
   const leftItems: Array<navItemProps> = [
     {
       key: "home",
@@ -87,7 +93,7 @@ const Header = ({ brands }: { brands: BrandProps[] }) => {
           >
             <SearchOutlined />
           </button>
-          <Cart>
+          <Cart cart={cart}>
             <Link href="/cart">
               <div className="flex items-center justify-center border-0 bg-transparent px-1 py-2 text-2xl">
                 <ShoppingCartOutlined />

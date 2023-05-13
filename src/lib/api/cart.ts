@@ -120,9 +120,52 @@ export const getCart = async (
     const client: MongoClient = await clientPromise;
     const collection = client.db("sneaker-store").collection("carts");
 
-    const cart: any = await collection.findOne({
-      _id: new ObjectId(cartToken),
-    });
+    // .findOne({
+    //   _id: new ObjectId(cartToken),
+    // });
+    const cart: any = await collection
+      .aggregate([
+        {
+          $match: {
+            _id: new ObjectId(cartToken),
+          },
+        },
+        {
+          $unwind: "$data",
+        },
+        {
+          $lookup: {
+            from: "products",
+            localField: "data.id",
+            foreignField: "_id",
+            as: "data_lookup",
+            pipeline: [
+              {
+                $project: {
+                  sizes: 0,
+                  images: 0,
+                  description: 0,
+                  category: 0,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $unwind: "$data_lookup",
+        },
+        {
+          $group: {
+            _id: "$_id",
+            data: {
+              $push: {
+                $mergeObjects: ["$data_lookup", "$data"],
+              },
+            },
+          },
+        },
+      ])
+      .next();
 
     return cart;
   } catch (err) {
