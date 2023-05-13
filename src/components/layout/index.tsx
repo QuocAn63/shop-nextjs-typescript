@@ -8,10 +8,14 @@ const Layout = ({ children }: { children: ReactNode }) => {
   const [brands, setBrands] = useState<BrandProps[]>([]);
   useEffect(() => {
     const getBrands = async () => {
-      const brandResponse = await axios.get("/api/brands");
-      const cartResponse = await axios.get("/api/cart");
+      try {
+        const brandResponse = await axios.get("/api/brands");
+        const cartResponse = await axios.get("/api/cart");
 
-      setBrands(brandResponse.data);
+        setBrands(brandResponse.data);
+      } catch (err) {
+        console.log(err);
+      }
     };
 
     getBrands();

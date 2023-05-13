@@ -1,16 +1,18 @@
-import { MongoClient, ObjectId } from "mongodb";
+import { MongoClient, ObjectId, PushOperator } from "mongodb";
 import clientPromise from "../mongodb";
 import { ProductProps } from "./product";
+import { middleware } from "@/pages/api/cart";
 
 export interface CartProps {
   _id: ObjectId;
   data: CartProductItem[];
 }
 
-export type CartProductItem = Pick<
-  ProductProps,
-  "name" | "slug" | "theme" | "price" | "promotion"
-> & { size: number; quantity: number };
+export interface CartProductItem {
+  id: ObjectId;
+  size: string;
+  quantity: number;
+}
 
 export const createNewCart = async (): Promise<string> => {
   const client: MongoClient = await clientPromise;
@@ -42,64 +44,68 @@ export const updateCart = async (
 
     return cart;
   } catch (err) {
-    console.log(err);
     return null;
   }
 };
 
 export const addProductToCart = async (
   cartToken?: string,
+  size?: string,
   productId?: string,
   quantity = 1
-): Promise<ProductProps | object> => {
+): Promise<number> => {
   try {
     if (!cartToken) {
-      throw "No cart token given";
+      throw { message: "No cart token given", status: 400 };
     }
     if (!productId) {
-      throw "No product id given";
+      throw { message: "No product id given", status: 400 };
     }
 
     const client: MongoClient = await clientPromise;
     const cartCollection = client.db("sneaker-store").collection("carts");
     const productCollection = client.db("sneaker-store").collection("products");
+    let cartItemData: CartProductItem;
 
     // check product already existed
     const isExist = await cartCollection.findOne({
       _id: new ObjectId(cartToken),
-      data: { $in: [new ObjectId(productId)] },
+      "data.id": { $in: [new ObjectId(productId)] },
     });
+    if (isExist) {
+      throw { message: "Product already in cart", status: 400 };
+    }
+
+    // Check the existing of product with the given id
     const isInvalidProductId = await productCollection.findOne({
       _id: new ObjectId(productId),
     });
-    console.log(isInvalidProductId);
-    if (isExist) {
-      throw "Product already in cart";
-    }
-
     if (!isInvalidProductId) {
-      throw "Can not find product with the given id";
+      throw { message: "Can not find product with the given id", status: 404 };
     }
 
-    const result: any = await cartCollection.findOneAndUpdate(
+    if (!size) {
+      throw { message: "No product size given", status: 400 };
+    }
+
+    cartItemData = {
+      id: new ObjectId(productId),
+      size,
+      quantity,
+    };
+
+    const result = await cartCollection.findOneAndUpdate(
       { _id: new ObjectId(cartToken) },
       {
         $push: {
-          data: {
-            id: new ObjectId(productId),
-            quantity,
-          },
-        },
+          data: cartItemData,
+        } as PushOperator<Document>,
       }
     );
 
-    return result;
+    return result.ok;
   } catch (err) {
-    console.log(err);
-    return {
-      message: err,
-      status: 422,
-    };
+    throw err;
   }
 };
 
@@ -110,16 +116,16 @@ export const getCart = async (
     if (!cartToken) {
       throw new Error("No token given");
     }
+
     const client: MongoClient = await clientPromise;
     const collection = client.db("sneaker-store").collection("carts");
 
     const cart: any = await collection.findOne({
       _id: new ObjectId(cartToken),
     });
+
     return cart;
   } catch (err) {
-    console.log(err);
-
-    return null;
+    throw err;
   }
 };

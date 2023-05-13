@@ -18,7 +18,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     : 1;
 
   const blogs = await getBlogs(pageNum);
-  console.log(blogs);
   return {
     props: {
       blogs: JSON.parse(JSON.stringify(blogs.data)),

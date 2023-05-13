@@ -145,7 +145,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const products = await getProducts(queryParams);
   const brands = await getAllBrands();
-  console.log(products);
   return {
     props: {
       products: products.data,
