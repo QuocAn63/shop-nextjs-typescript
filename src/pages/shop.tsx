@@ -7,6 +7,7 @@ import useQueryParam from "@/hooks/useQueryParam";
 import clientPromise from "@/lib/mongodb";
 import {
   ProductProps,
+  ProductQueryKeysProps,
   ProductsWithMetadata,
   getProducts,
 } from "@/lib/api/product";
@@ -134,14 +135,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     await clientPromise;
   } catch (err) {}
-  const queryParams = Object.keys(context.query).reduce((cur, key) => {
-    let queryKeys = (context.query[key] as string).split(",");
-    context.query[key] = queryKeys;
-    return {
-      ...cur,
-      [key]: queryKeys,
-    };
-  }, {});
+  const queryParams: ProductQueryKeysProps = Object.keys(context.query).reduce(
+    (cur, key) => {
+      let queryKeys = (context.query[key] as string).split(",");
+      context.query[key] = queryKeys;
+      return {
+        ...cur,
+        [key]: queryKeys,
+      };
+    },
+    {}
+  );
 
   const products = await getProducts(queryParams);
   const brands = await getAllBrands();

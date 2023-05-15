@@ -25,7 +25,7 @@ const productItem = {
   size: "30.5",
 };
 
-const CalculateTotal = (cart: CartItem[]) => {
+const CalculateTotal = (cart: CartProps[]) => {
   let total = cart.reduce(
     (sum, item) =>
       sum + (item.price * (100 - item.promotion) * item.quantity) / 100,
@@ -77,58 +77,58 @@ const Checkout = () => {
       <header>
         <title>Sneaker Store - Checkout</title>
       </header>
-        <Row gutter={40}>
-          <Col span={24}>
-            <div className="flex gap-2 items-end pb-5">
-              <span className="text-2xl uppercase font-semibold">Checkout</span>
-            </div>
-          </Col>
-          <Col span={12}>
-            <p className="text-lg">Shipment Details:</p>
-            <div className="py-3">
-              <Space direction="vertical" className="w-full">
+      <Row gutter={40}>
+        <Col span={24}>
+          <div className="flex gap-2 items-end pb-5">
+            <span className="text-2xl uppercase font-semibold">Checkout</span>
+          </div>
+        </Col>
+        <Col span={12}>
+          <p className="text-lg">Shipment Details:</p>
+          <div className="py-3">
+            <Space direction="vertical" className="w-full">
+              <Input
+                name="customer_fullName"
+                placeholder="Full Name"
+                className="py-2"
+              />
+              <Space.Compact block>
                 <Input
-                  name="customer_fullName"
-                  placeholder="Full Name"
+                  name="customer_email"
+                  placeholder="Email"
+                  type="email"
                   className="py-2"
                 />
-                <Space.Compact block>
-                  <Input
-                    name="customer_email"
-                    placeholder="Email"
-                    type="email"
-                    className="py-2"
-                  />
-                  <Input
-                    name="customer_phoneNumber"
-                    placeholder="Phone Number"
-                    className="py-2 w-1/2"
-                  />
-                </Space.Compact>
-                <Tabs items={tabItems} className="mt-5"></Tabs>
-              </Space>
-            </div>
-            <button className="mt-3 w-full text-white font-semibold uppercase bg-black py-2 rounded hover:text-white">
-              Purchase
-            </button>
-          </Col>
-          <Col span={12}>
-            <Space direction="vertical">
-              {cart.map((item, index) => (
-                <CheckoutItem key={index} {...item} />
-              ))}
+                <Input
+                  name="customer_phoneNumber"
+                  placeholder="Phone Number"
+                  className="py-2 w-1/2"
+                />
+              </Space.Compact>
+              <Tabs items={tabItems} className="mt-5"></Tabs>
             </Space>
-            <hr className="my-5" />
-            <div>
-              <p className="text-right">
-                <span className="text-lg font-medium">Total:</span>
-                <Currency className="text-xl font-semibold ml-2">
-                  {CalculateTotal(cart)}
-                </Currency>
-              </p>
-            </div>
-          </Col>
-        </Row>
+          </div>
+          <button className="mt-3 w-full text-white font-semibold uppercase bg-black py-2 rounded hover:text-white">
+            Purchase
+          </button>
+        </Col>
+        <Col span={12}>
+          <Space direction="vertical">
+            {cart.map((item, index) => (
+              <CheckoutItem key={index} {...item} />
+            ))}
+          </Space>
+          <hr className="my-5" />
+          <div>
+            <p className="text-right">
+              <span className="text-lg font-medium">Total:</span>
+              <Currency className="text-xl font-semibold ml-2">
+                {CalculateTotal(cart)}
+              </Currency>
+            </p>
+          </div>
+        </Col>
+      </Row>
     </>
   );
 };

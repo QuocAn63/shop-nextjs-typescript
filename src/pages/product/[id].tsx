@@ -15,6 +15,9 @@ import { ProductProps } from "@/lib/api/product";
 import { GetServerSideProps } from "next";
 import clientPromise from "@/lib/mongodb";
 import { getProduct } from "@/lib/api/product";
+import axios from "axios";
+import Router from "next/router";
+import { ObjectId } from "mongodb";
 const buttonStatus = {
   active:
     "border border-black bg-black text-white hover:text-white h-10 rounded text-center min-w-[200px] font-semibold",
@@ -46,28 +49,52 @@ export interface ProductPageProps {
   product: ProductProps;
 }
 
+type ProductSelection = {
+  id: ObjectId;
+  size: string | null;
+  quantity: number | 1;
+};
+
 const Product = ({ product }: ProductPageProps) => {
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [currentProductSelection, setCurrentProductSelection] =
+    useState<ProductSelection>({ id: product._id, size: null, quantity: 1 });
   let buttonProps: ButtonHTMLAttributes<HTMLButtonElement> = {
     className: buttonStatus["active"],
   };
-
   const sizeButtonClassName = (size: string): string => {
-    return selectedSize === size
+    return currentProductSelection.size === size
       ? "border border-gray-500 px-2 py-2 cursor-pointer hover:bg-black hover:text-white " +
           styles["selectedSize"]
       : "border border-gray-500 px-2 py-2 cursor-pointer hover:bg-black hover:text-white";
   };
 
   const handleClickSizeButton = (size: string): void => {
-    setSelectedSize(size);
+    setCurrentProductSelection((prev) => ({ ...prev, size }));
   };
 
-  const handleBuyButton = () => {
-    alert("You hit buy button");
+  const handleBuyButton = async () => {
+    try {
+      const result = await axios.post(
+        "/api/cart/add",
+        {
+          ...currentProductSelection,
+        },
+        { withCredentials: true }
+      );
+
+      alert(result.data.message);
+      Router.reload();
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        let errorMessage = err.response?.data.message;
+        alert(errorMessage);
+      } else {
+        alert("An unknown error occurred");
+      }
+    }
   };
 
-  if (!selectedSize) {
+  if (!currentProductSelection.size) {
     buttonProps.onClick = () => {};
     buttonProps.className = buttonStatus["disable"];
   } else {
@@ -132,8 +159,18 @@ const Product = ({ product }: ProductPageProps) => {
             </Space>
           </div>
           <div className="flex items-center gap-5">
-            <InputNumber min={1} defaultValue={1} size="large" />
-            <button {...buttonProps}>Buy Now</button>
+            <InputNumber
+              min={1}
+              defaultValue={1}
+              size="large"
+              onChange={(value) =>
+                setCurrentProductSelection((prev) => ({
+                  ...prev,
+                  quantity: value as number,
+                }))
+              }
+            />
+            <button {...buttonProps}>Add To Cart</button>
           </div>
           <div className="w-full h-[1px] bg-black my-5"></div>
           <div>

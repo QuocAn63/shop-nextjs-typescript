@@ -1,7 +1,8 @@
 import clientPromise from "@/lib/mongodb";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 
 export interface ProductProps {
+  _id: ObjectId;
   modelId: string;
   name: string;
   slug: string;
@@ -66,10 +67,7 @@ export const getProduct = async (
   const client: MongoClient = await clientPromise;
   const collection = client.db("sneaker-store").collection("products");
 
-  const result: any = await collection.findOne(
-    { slug },
-    { projection: { _id: 0 } }
-  );
+  const result: any = await collection.findOne({ slug });
 
   if (result)
     return {

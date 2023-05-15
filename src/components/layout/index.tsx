@@ -5,16 +5,17 @@ import axios from "axios";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const [headerProps, setHeaderProps] = useState<HeaderProps>();
+
   useEffect(() => {
     const getBrands = async () => {
       try {
         const brandResponse = await axios.get("/api/brands");
-        const cartResponse = await axios.get("/api/cart", {
+        let cartResponse = await axios.get("/api/cart", {
           withCredentials: true,
         });
         setHeaderProps({
           brands: brandResponse.data,
-          cart: cartResponse.data.data,
+          cart: cartResponse?.data.data,
         });
       } catch (err) {
         console.log(err);

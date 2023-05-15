@@ -2,9 +2,9 @@ import { Col, Image, Row, Typography } from "antd";
 import { FC } from "react";
 import Currency from "../currency";
 import Link from "next/link";
-import { CartItem } from "@/interfaces";
+import { CartProductItem } from "@/lib/api/cart";
 
-const CartItem: FC<React.HTMLAttributes<HTMLElement> & CartItem> = ({
+const CartItem: FC<React.HTMLAttributes<HTMLElement> & CartProductItem> = ({
   name,
   theme,
   quantity,
@@ -20,7 +20,7 @@ const CartItem: FC<React.HTMLAttributes<HTMLElement> & CartItem> = ({
     >
       <Row gutter={8}>
         <Col span={6}>
-          <Image src={theme} alt={name} preview={false} />
+          <Image src={`/${theme}`} alt={name} preview={false} />
         </Col>
         <Col span={18}>
           <div className="mt-2 flex flex-col justify-between">

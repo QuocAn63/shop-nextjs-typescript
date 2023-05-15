@@ -3,16 +3,20 @@ import clientPromise from "../mongodb";
 import { ProductProps } from "./product";
 import { middleware } from "@/pages/api/cart";
 
-export interface CartProps {
+interface FetchCartProps {
   _id: ObjectId;
-  data: CartProductItem[];
+  data: FetchCartProductItem[];
 }
 
-export interface CartProductItem {
+interface FetchCartProductItem {
   id: ObjectId;
   size: string;
   quantity: number;
 }
+
+export type CartProductItem = ProductProps & { size: string; quantity: number };
+
+export type CartProps = { _id: ObjectId; data: CartProductItem[] };
 
 export const createNewCart = async (): Promise<string> => {
   const client: MongoClient = await clientPromise;
@@ -23,7 +27,7 @@ export const createNewCart = async (): Promise<string> => {
 
 export const updateCart = async (
   cartToken: string,
-  cartProducts: CartProductItem[]
+  cartProducts: FetchCartProductItem[]
 ): Promise<CartProps | null> => {
   try {
     const client: MongoClient = await clientPromise;
@@ -48,24 +52,69 @@ export const updateCart = async (
   }
 };
 
-export const addProductToCart = async (
-  cartToken?: string,
-  size?: string,
-  productId?: string,
+export const createCartAndAddProduct = async (
+  productId: string,
+  size: string,
   quantity = 1
-): Promise<number> => {
+): Promise<string> => {
   try {
-    if (!cartToken) {
-      throw { message: "No cart token given", status: 400 };
-    }
     if (!productId) {
-      throw { message: "No product id given", status: 400 };
+      throw { message: "No product id provided", status: 400 };
+    }
+
+    if (!size) {
+      throw { message: "No size provided", status: 400 };
     }
 
     const client: MongoClient = await clientPromise;
     const cartCollection = client.db("sneaker-store").collection("carts");
     const productCollection = client.db("sneaker-store").collection("products");
-    let cartItemData: CartProductItem;
+
+    // Check the existing of product with the provided id
+    const isInvalidProductId = await productCollection.findOne({
+      _id: new ObjectId(productId),
+    });
+    if (!isInvalidProductId) {
+      throw {
+        message: "Can not find product with the provided id",
+        status: 404,
+      };
+    }
+
+    let cartItemData: FetchCartProductItem = {
+      id: new ObjectId(productId),
+      size,
+      quantity,
+    };
+
+    const result = await cartCollection.insertOne({
+      data: [cartItemData],
+    });
+
+    return result.insertedId.toString();
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const addProductToCart = async (
+  cartToken?: string,
+  size?: string,
+  productId?: string,
+  quantity = 1
+): Promise<string | null> => {
+  try {
+    if (!cartToken) {
+      throw { message: "No cart token provided", status: 400 };
+    }
+    if (!productId) {
+      throw { message: "No product id provided", status: 400 };
+    }
+
+    const client: MongoClient = await clientPromise;
+    const cartCollection = client.db("sneaker-store").collection("carts");
+    const productCollection = client.db("sneaker-store").collection("products");
+    let cartItemData: FetchCartProductItem;
 
     // check product already existed
     const isExist = await cartCollection.findOne({
@@ -76,16 +125,19 @@ export const addProductToCart = async (
       throw { message: "Product already in cart", status: 400 };
     }
 
-    // Check the existing of product with the given id
+    // Check the existing of product with the provided id
     const isInvalidProductId = await productCollection.findOne({
       _id: new ObjectId(productId),
     });
     if (!isInvalidProductId) {
-      throw { message: "Can not find product with the given id", status: 404 };
+      throw {
+        message: "Can not find product with the provided id",
+        status: 404,
+      };
     }
 
     if (!size) {
-      throw { message: "No product size given", status: 400 };
+      throw { message: "No product size provided", status: 400 };
     }
 
     cartItemData = {
@@ -103,7 +155,10 @@ export const addProductToCart = async (
       }
     );
 
-    return result.ok;
+    if (result.value === null) {
+      return null;
+    }
+    return result.value._id.toString();
   } catch (err) {
     throw err;
   }
@@ -114,15 +169,12 @@ export const getCart = async (
 ): Promise<CartProps | null> => {
   try {
     if (!cartToken) {
-      throw new Error("No token given");
+      throw new Error("No token provided");
     }
 
     const client: MongoClient = await clientPromise;
     const collection = client.db("sneaker-store").collection("carts");
 
-    // .findOne({
-    //   _id: new ObjectId(cartToken),
-    // });
     const cart: any = await collection
       .aggregate([
         {
@@ -168,6 +220,38 @@ export const getCart = async (
       .next();
 
     return cart;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const removeProductFromCart = async (
+  cartToken: string,
+  productId: string
+): Promise<string | null> => {
+  try {
+    const client: MongoClient = await clientPromise;
+    const collection = client.db("sneaker-store").collection("carts");
+
+    const result = await collection.findOneAndUpdate(
+      {
+        _id: new ObjectId(cartToken),
+        "data.id": new ObjectId(productId),
+      },
+      {
+        $pull: {
+          data: {
+            id: new ObjectId(productId),
+          },
+        } as any,
+      }
+    );
+
+    if (result.ok && result.value !== null) {
+      return result.value._id.toString();
+    } else {
+      throw { message: "Error occurred while updating cart", status: 400 };
+    }
   } catch (err) {
     throw err;
   }
