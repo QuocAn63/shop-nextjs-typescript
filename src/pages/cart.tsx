@@ -5,10 +5,12 @@ import { ProductProps } from "@/lib/api/product";
 import { CloseOutlined } from "@ant-design/icons";
 import { Col, InputNumber, Row, Space, Table } from "antd";
 import { ColumnsType } from "antd/es/table";
+import axios from "axios";
 import { ObjectId } from "mongodb";
 import { GetServerSideProps, GetStaticProps } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Router from "next/router";
 import { FC, useState } from "react";
 
 interface CartPageProps {
@@ -111,19 +113,37 @@ const Cart: FC<CartPageProps> = ({ cartToken, cart }) => {
     },
   ];
 
-  const handleChangeQuantity = (productId: ObjectId) => (value: number) => {
-    const newCart = currentCart.map((item) => {
-      if (item._id === productId && typeof value === "number") {
-        item.quantity = value;
-      }
-      return item;
-    });
-    setCurrentCart(newCart);
-  };
+  const handleChangeQuantity =
+    (productId: ObjectId) => async (value: number) => {
+      const newCart = currentCart.map((item) => {
+        if (item._id === productId && typeof value === "number") {
+          item.quantity = value;
+        }
+        return { id: item._id, quantity: value, size: item.size };
+      });
+      try {
+        const result = await axios.put("/api/cart/update", {
+          cart: JSON.stringify(newCart),
+        });
 
-  const handleRemoveProduct = (productId: ObjectId) => {
-    const newCart = currentCart.filter((item) => item._id !== productId);
-    setCurrentCart(newCart);
+        alert(result.data.message);
+        Router.reload();
+      } catch (err) {
+        alert(err);
+      }
+    };
+
+  const handleRemoveProduct = async (productId: ObjectId) => {
+    try {
+      const result = await axios.delete("/api/cart/update", {
+        data: { id: productId.toString() },
+      });
+
+      alert(result.data.message);
+      Router.reload();
+    } catch (err) {
+      alert(err);
+    }
   };
 
   return (

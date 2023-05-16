@@ -1,14 +1,13 @@
 import { MongoClient, ObjectId, PushOperator } from "mongodb";
 import clientPromise from "../mongodb";
 import { ProductProps } from "./product";
-import { middleware } from "@/pages/api/cart";
 
 interface FetchCartProps {
   _id: ObjectId;
   data: FetchCartProductItem[];
 }
 
-interface FetchCartProductItem {
+export interface FetchCartProductItem {
   id: ObjectId;
   size: string;
   quantity: number;
@@ -16,7 +15,12 @@ interface FetchCartProductItem {
 
 export type CartProductItem = ProductProps & { size: string; quantity: number };
 
-export type CartProps = { _id: ObjectId; data: CartProductItem[] };
+export type CartProps = {
+  _id: ObjectId;
+  data: CartProductItem[];
+  itemCounts: number;
+  total: number;
+};
 
 export const createNewCart = async (): Promise<string> => {
   const client: MongoClient = await clientPromise;
@@ -27,28 +31,27 @@ export const createNewCart = async (): Promise<string> => {
 
 export const updateCart = async (
   cartToken: string,
-  cartProducts: FetchCartProductItem[]
-): Promise<CartProps | null> => {
+  cart: FetchCartProductItem[]
+): Promise<string | null> => {
   try {
     const client: MongoClient = await clientPromise;
-    const collection = client.db("snaker-store").collection("carts");
+    const collection = client.db("sneaker-store").collection("carts");
 
-    if (!cartToken) {
-      cartToken = await createNewCart();
-    }
-
-    const cart: any = await collection.findOneAndUpdate(
+    const result = await collection.findOneAndUpdate(
       { _id: new ObjectId(cartToken) },
       {
         $set: {
-          data: cartProducts,
+          data: cart,
         },
       }
     );
 
-    return cart;
+    if (result.value === null || result.ok === 0) {
+      throw { message: "Update failed" };
+    }
+    return result.value._id.toString();
   } catch (err) {
-    return null;
+    throw err;
   }
 };
 
@@ -194,6 +197,7 @@ export const getCart = async (
             pipeline: [
               {
                 $project: {
+                  id: 0,
                   sizes: 0,
                   images: 0,
                   description: 0,
@@ -213,6 +217,38 @@ export const getCart = async (
               $push: {
                 $mergeObjects: ["$data_lookup", "$data"],
               },
+            },
+          },
+        },
+        {
+          $addFields: {
+            itemCounts: {
+              $size: "$data",
+            },
+          },
+        },
+        {
+          $addFields: {
+            data: {
+              $map: {
+                input: "$data",
+                as: "item",
+                in: {
+                  $mergeObjects: [
+                    "$$item",
+                    {
+                      total: { $multiply: ["$$item.price", "$$item.quantity"] },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        {
+          $addFields: {
+            total: {
+              $sum: "$data.total",
             },
           },
         },
