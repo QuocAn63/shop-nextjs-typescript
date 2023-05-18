@@ -22,16 +22,24 @@ export const getServerSideProps: GetServerSideProps<CartPageProps> = async ({
   req,
   res,
 }) => {
-  let cartTokenCookie = req.cookies["cartToken"];
+  try {
+    let cartTokenCookie = req.cookies["cartToken"];
 
-  let cart = await getCart(cartTokenCookie);
-  console.log(cart);
-  return {
-    props: {
-      cartToken: cartTokenCookie || null,
-      cart: JSON.parse(JSON.stringify(cart)),
-    },
-  };
+    let cart = await getCart(cartTokenCookie);
+    return {
+      props: {
+        cartToken: cartTokenCookie || null,
+        cart: JSON.parse(JSON.stringify(cart)),
+      },
+    };
+  } catch (err) {
+    return {
+      props: {
+        cartToken: null,
+        cart: null,
+      },
+    };
+  }
 };
 
 const Cart: FC<CartPageProps> = ({ cartToken, cart }) => {

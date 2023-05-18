@@ -17,7 +17,7 @@ export const middleware = async (
 
     if (!isValidCart) {
       throw {
-        status: 404,
+        status: 200,
         message: "No cart found",
         data: null,
       };
@@ -38,11 +38,18 @@ const handler = async (
     const cartMiddleware = await middleware(request, response);
     if (request.method === "GET") {
       let cart = cartMiddleware?.cart;
-
-      if (!cart) {
+      if (!cart || cart.data.length === 0) {
         return response
-          .status(404)
-          .json({ message: "No cart found", status: 404, data: null });
+          .setHeader(
+            "Set-Cookie",
+            "cartToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+          )
+          .status(200)
+          .json({
+            message: "Cart expired or no token provided",
+            status: 200,
+            data: null,
+          });
       }
       return response
         .status(200)

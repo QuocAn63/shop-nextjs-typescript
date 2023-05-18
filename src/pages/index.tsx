@@ -1,4 +1,3 @@
-import Layout from "@/components/layout";
 import Product from "@/components/product";
 import { Carousel, Col, Image, Row, Typography } from "antd";
 import Head from "next/head";
@@ -38,7 +37,7 @@ export default function Home({ homeProps, ...props }: homePropsType) {
           {homeProps.homeCategories.map((category) => (
             <Col span={6} key={category.title as string}>
               <Link
-                href="/"
+                href={`/shop?category=${category.title}`}
                 title="Air Jordan 1"
                 className={"relative block " + styles.categoryTab}
               >

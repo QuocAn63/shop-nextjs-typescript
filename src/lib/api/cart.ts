@@ -181,80 +181,115 @@ export const getCart = async (
     const cart: any = await collection
       .aggregate([
         {
-          $match: {
-            _id: new ObjectId(cartToken),
-          },
-        },
-        {
-          $unwind: "$data",
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "data.id",
-            foreignField: "_id",
-            as: "data_lookup",
-            pipeline: [
+          $facet: {
+            empty: [
               {
-                $project: {
-                  id: 0,
-                  sizes: 0,
-                  images: 0,
-                  description: 0,
-                  category: 0,
+                $match: {
+                  _id: new ObjectId(cartToken),
+                  data: [],
+                },
+              },
+            ],
+            nonEmpty: [
+              {
+                $match: {
+                  _id: new ObjectId(cartToken),
+                  data: { $ne: [] },
+                },
+              },
+              {
+                $unwind: "$data",
+              },
+              {
+                $lookup: {
+                  from: "products",
+                  localField: "data.id",
+                  foreignField: "_id",
+                  as: "data_lookup",
+                  pipeline: [
+                    {
+                      $project: {
+                        id: 0,
+                        sizes: 0,
+                        images: 0,
+                        description: 0,
+                        category: 0,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                $unwind: "$data_lookup",
+              },
+              {
+                $group: {
+                  _id: "$_id",
+                  data: {
+                    $push: {
+                      $mergeObjects: ["$data_lookup", "$data"],
+                    },
+                  },
+                },
+              },
+              {
+                $addFields: {
+                  itemCounts: {
+                    $size: "$data",
+                  },
+                },
+              },
+              {
+                $addFields: {
+                  data: {
+                    $map: {
+                      input: "$data",
+                      as: "item",
+                      in: {
+                        $mergeObjects: [
+                          "$$item",
+                          {
+                            total: {
+                              $multiply: ["$$item.price", "$$item.quantity"],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+              {
+                $addFields: {
+                  total: {
+                    $sum: "$data.total",
+                  },
                 },
               },
             ],
           },
         },
         {
-          $unwind: "$data_lookup",
-        },
-        {
-          $group: {
-            _id: "$_id",
+          $project: {
             data: {
-              $push: {
-                $mergeObjects: ["$data_lookup", "$data"],
+              $cond: {
+                if: { $gt: [{ $size: "$nonEmpty" }, 0] },
+                then: "$nonEmpty",
+                else: "$empty",
               },
             },
           },
         },
         {
-          $addFields: {
-            itemCounts: {
-              $size: "$data",
-            },
-          },
+          $unwind: "$data",
         },
         {
-          $addFields: {
-            data: {
-              $map: {
-                input: "$data",
-                as: "item",
-                in: {
-                  $mergeObjects: [
-                    "$$item",
-                    {
-                      total: { $multiply: ["$$item.price", "$$item.quantity"] },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-        },
-        {
-          $addFields: {
-            total: {
-              $sum: "$data.total",
-            },
+          $replaceRoot: {
+            newRoot: "$data",
           },
         },
       ])
       .next();
-
     return cart;
   } catch (err) {
     throw err;

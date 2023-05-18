@@ -4,12 +4,15 @@ import Footer from "../footer";
 import axios from "axios";
 
 const Layout = ({ children }: { children: ReactNode }) => {
-  const [headerProps, setHeaderProps] = useState<HeaderProps>();
+  const [headerProps, setHeaderProps] = useState<HeaderProps>({
+    brands: [],
+    cart: undefined,
+  });
 
   useEffect(() => {
     const getBrands = async () => {
       try {
-        const brandResponse = await axios.get("/api/brands");
+        let brandResponse = await axios.get("/api/brands");
         let cartResponse = await axios.get("/api/cart", {
           withCredentials: true,
         });
@@ -17,13 +20,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
           brands: brandResponse.data,
           cart: cartResponse?.data.data,
         });
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     };
 
     getBrands();
   }, []);
+
   return (
     <div className="w-full flex flex-col items-center flex-wrap">
       <Header brands={headerProps?.brands} cart={headerProps?.cart} />

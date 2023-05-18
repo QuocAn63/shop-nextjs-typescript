@@ -40,7 +40,6 @@ export default async function handler(
 
           return product;
         });
-        console.log(cart);
         result = await updateCart(
           cartMiddleware.cart?._id.toString() as string,
           cart

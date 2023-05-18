@@ -1,4 +1,4 @@
-import { Dropdown, Typography } from "antd";
+import { Dropdown, Empty, Typography } from "antd";
 import { FC, ReactNode } from "react";
 import CartItem from "./cartItem";
 import Link from "next/link";
@@ -34,7 +34,10 @@ const Cart: FC<CartComponentProps> = ({ cart, children }) => {
               </div>
             </>
           ) : (
-            <div>Empty cart</div>
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="Cart is empty"
+            />
           )}
         </div>
       )}

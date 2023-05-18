@@ -13,6 +13,7 @@ export interface HomeProps {
 export interface HomeCategoryProps {
   theme: string;
   title: string;
+  slug: string;
 }
 
 export const getHomeCategories = async () => {

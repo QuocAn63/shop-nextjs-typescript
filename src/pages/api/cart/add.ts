@@ -38,7 +38,7 @@ const handler = async (
         path: "/",
       });
 
-      response.setHeader("Set-Cookie", cookie);
+      response.setHeader("Set-Cookie", [cookie]);
 
       return response
         .status(200)
