@@ -1,0 +1,40 @@
+// bg-black fixed top-0 left-0 right-0 bottom-0 z-40 opacity-0 transition-all invisible
+.seachOverlay {
+  background: black;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  opacity: 0;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  visibility: hidden;
+
+  &.showOverlay {
+    opacity: 0.3;
+    visibility: visible;
+  }
+}
+
+// "bg-white fixed -top-[100px] left-0 right-0 z-50 h-[100px] opacity-0 transition-all"
+.searchModal {
+  background: white;
+  position: fixed;
+  top: -100px;
+  left: 0;
+  right: 0;
+  height: 100px;
+  z-index: 50;
+  opacity: 0;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+
+  &.showModal {
+    opacity: 1;
+    transform: translateY(100px);
+  }
+}

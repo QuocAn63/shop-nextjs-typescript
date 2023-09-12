@@ -1,0 +1,19 @@
+.contentSection {
+  min-height: 220px;
+
+  & + & {
+    margin-top: 80px;
+  }
+}
+
+.categoryTab {
+  &:hover .categoryTab_theme {
+    transform: scale(1.2);
+    transition: all 0.5s;
+  }
+
+  &:hover .categoryTab_title {
+    background: black;
+    color: white;
+  }
+}
