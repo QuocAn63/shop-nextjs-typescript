@@ -1,7 +1,4 @@
-import CartItem from "@/components/cart/cartItem";
-import Layout from "@/components/layout";
 import {
-  Button,
   Col,
   Input,
   Row,
@@ -14,18 +11,11 @@ import {
 import CheckoutItem from "./checkoutItem";
 import Currency from "@/components/currency";
 import { useState } from "react";
+import { CartProductItem, getCart } from "@/lib/api/cart";
+import { GetServerSideProps } from "next";
+import { CartPageProps } from "../cart";
 
-const productItem = {
-  id: "1",
-  name: "AIR JORDAN 1 MID LIGHT CARDINAL CURRY (GS) [554725-201]",
-  theme: "/91-7329.jpg",
-  price: 4200000,
-  promotion: 30,
-  quantity: 1,
-  size: "30.5",
-};
-
-const CalculateTotal = (cart: CartProps[]) => {
+const CalculateTotal = (cart: CartProductItem[]) => {
   let total = cart.reduce(
     (sum, item) =>
       sum + (item.price * (100 - item.promotion) * item.quantity) / 100,
@@ -35,13 +25,34 @@ const CalculateTotal = (cart: CartProps[]) => {
   return total;
 };
 
-const Checkout = () => {
-  const [cart, setCart] = useState([
-    productItem,
-    productItem,
-    productItem,
-    productItem,
-  ]);
+export const getServerSideProps: GetServerSideProps<CartPageProps> = async ({
+  req,
+  res,
+}) => {
+  try {
+    let cartTokenCookie = req.cookies["cartToken"];
+
+    let cart = await getCart(cartTokenCookie);
+    return {
+      props: {
+        cartToken: cartTokenCookie || null,
+        cart: JSON.parse(JSON.stringify(cart)),
+      },
+    };
+  } catch (err) {
+    return {
+      props: {
+        cartToken: null,
+        cart: null,
+      },
+    };
+  }
+};
+
+const Checkout = ({ cart, cartToken }: CartPageProps) => {
+  const [currentCart, setCart] = useState<CartProductItem[]>(
+    cart?.data ? cart.data : []
+  );
 
   const tabItems: TabsProps["items"] = [
     {
@@ -114,7 +125,7 @@ const Checkout = () => {
         </Col>
         <Col span={12}>
           <Space direction="vertical">
-            {cart.map((item, index) => (
+            {currentCart.map((item, index) => (
               <CheckoutItem key={index} {...item} />
             ))}
           </Space>
@@ -123,7 +134,7 @@ const Checkout = () => {
             <p className="text-right">
               <span className="text-lg font-medium">Total:</span>
               <Currency className="text-xl font-semibold ml-2">
-                {CalculateTotal(cart)}
+                {CalculateTotal(currentCart)}
               </Currency>
             </p>
           </div>

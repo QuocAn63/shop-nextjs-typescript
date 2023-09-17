@@ -1,7 +1,6 @@
 import Currency from "@/components/currency";
 import { CartProductItem } from "@/lib/api/cart";
 import { CartProps, getCart } from "@/lib/api/cart";
-import { ProductProps } from "@/lib/api/product";
 import { CloseOutlined } from "@ant-design/icons";
 import { Col, InputNumber, Row, Space, Table } from "antd";
 import { ColumnsType } from "antd/es/table";
@@ -13,7 +12,7 @@ import Link from "next/link";
 import Router from "next/router";
 import { FC, useState } from "react";
 
-interface CartPageProps {
+export interface CartPageProps {
   cartToken: string | null;
   cart: CartProps | null;
 }

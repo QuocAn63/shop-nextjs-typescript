@@ -1,9 +1,18 @@
-import { BlogInterface } from "@/interfaces";
+import { BlogProps } from "@/lib/api/blog";
 import { Image, Typography } from "antd";
 import Link from "next/link";
 import { FC } from "react";
 
-const Blog : FC<BlogInterface> = ({id, title, slug, content, theme, author, createdAt, ...props}) => {
+const Blog: FC<BlogProps> = ({
+  id,
+  title,
+  slug,
+  content,
+  theme,
+  author,
+  createdAt,
+  ...props
+}) => {
   return (
     <Link
       href={`/blogs/${slug}`}
@@ -17,9 +26,7 @@ const Blog : FC<BlogInterface> = ({id, title, slug, content, theme, author, crea
         preview={false}
       />
       <div className="mt-2 px-5">
-        <Typography.Title level={4}>
-    {title}
-        </Typography.Title>
+        <Typography.Title level={4}>{title}</Typography.Title>
         <Typography.Text className="text-md">{createdAt}</Typography.Text>
       </div>
     </Link>
