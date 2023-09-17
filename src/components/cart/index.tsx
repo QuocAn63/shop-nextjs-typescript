@@ -20,9 +20,11 @@ const Cart: FC<CartComponentProps> = ({ cart, children }) => {
           {cart && cart?.data.length !== 0 ? (
             <>
               <div className="min-h-[220px]">
-                {cart?.data.map((cartItem) => (
-                  <CartItem {...cartItem} />
-                ))}
+                {cart
+                  ? cart.data.map((cartItem, index) => (
+                      <CartItem key={index} {...cartItem} />
+                    ))
+                  : null}
               </div>
               <div className="text-center pt-4">
                 <Link

@@ -17,6 +17,7 @@ const CartItem: FC<React.HTMLAttributes<HTMLElement> & CartProductItem> = ({
       href="/"
       title={name}
       className="block hover:text-inherit hover:opacity-80 py-1"
+      {...props}
     >
       <Row gutter={8}>
         <Col span={6}>
