@@ -1,10 +1,10 @@
 import Currency from "@/components/currency";
-import { CartItem } from "@/interfaces";
+import { CartProductItem } from "@/lib/api/cart";
 import { Image } from "antd";
 import Link from "next/link";
 
 const CheckoutItem = ({
-  id,
+  _id,
   name,
   price,
   promotion,
@@ -12,9 +12,9 @@ const CheckoutItem = ({
   size,
   theme,
   ...props
-}: CartItem) => {
+}: CartProductItem) => {
   return (
-    <Link href={`/product/${id}`} className="block w-full" {...props}>
+    <Link href={`/product/${_id}`} className="block w-full" {...props}>
       <div className="flex items-start w-full gap-3">
         <Image src={theme} alt={name} preview={false} width={"20%"} />
         <div className="flex-1">
