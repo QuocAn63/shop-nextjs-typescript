@@ -21,7 +21,7 @@ const Cart: FC<CartComponentProps> = ({ cart, children }) => {
             <>
               <div className="min-h-[220px]">
                 {cart?.data.map((cartItem) => (
-                  <CartItem {...cartItem} />
+                  <CartItem key={cartItem._id.toString()} {...cartItem} />
                 ))}
               </div>
               <div className="text-center pt-4">
